@@ -19,13 +19,13 @@ def quadratic_grad(x, A, b):
 
 def logreg_func(x, matrix, alpha = 0.1):
     x_exp = np.expand_dims(x, axis=1)
-    loss = np.mean(np.log(1 + np.exp(- matrix @ x_exp))) + alpha * np.square(np.linalg.norm(x))
+    loss = np.mean(np.log(1 + np.exp(- matrix @ x_exp))) + alpha/2 * np.square(np.linalg.norm(x))
     return loss
 
 def logreg_grad(x, matrix, alpha = 0.1):
     x_exp = np.expand_dims(x, axis=1)
     grad = - np.mean(matrix / (1 + np.exp(matrix @ x_exp)), axis = 0)
-    return grad + 2 * alpha * x
+    return grad + alpha * x
 
 def make_err_plot(optimizers_list, labels=None, title=None, markers=None, colors=None, save_name=None):
     if markers is None:
@@ -35,7 +35,7 @@ def make_err_plot(optimizers_list, labels=None, title=None, markers=None, colors
 
     x_label = "The number of oracle calls"
     if optimizers_list[0].x_sol is not None:
-        y_label = r'$\frac{f(x^k) - f(x^*)}{f(x^0) - f(x^*)}$'
+        y_label = r'$\frac{||x^k - x^*||}{||x^0 - x^*||}$'
     else:
         y_label = r'$||\nabla f(x^k)||$'
 
@@ -68,7 +68,6 @@ def make_err_plot(optimizers_list, labels=None, title=None, markers=None, colors
     
     if save_name is not None:
         plt.savefig(f"figures/{save_name}.pdf", format='pdf')
-        plt.savefig(f"figures/{save_name}.svg", format='svg')
         plt.savefig(f"figures/{save_name}.png", format='png')
         
     plt.show()

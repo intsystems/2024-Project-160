@@ -28,6 +28,7 @@ class GDOptimizer:
                 self.c = gradient_approximator.ZO_oracle.c
             elif self.func_name == "mushrooms":
                 self.matrix = gradient_approximator.ZO_oracle.matrix
+                self.alpha = gradient_approximator.ZO_oracle.alpha
         except AttributeError:
             self.func_name = gradient_approximator.func_name
             if self.func_name == "quadratic":
@@ -36,12 +37,13 @@ class GDOptimizer:
                 self.c = gradient_approximator.c
             if self.func_name == "mushrooms":
                 self.matrix = gradient_approximator.matrix    
+                self.alpha = gradient_approximator.alpha
 
         if x_sol is not None:
             if self.func_name == "quadratic": 
                 self.f_sol = utils.quadratic_func(self.x_sol, self.A, self.b, self.c)
             elif self.func_name == "mushrooms":
-                self.f_sol = utils.logreg_func(self.x_sol, self.matrix)
+                self.f_sol = utils.logreg_func(self.x_sol, self.matrix, self.alpha)
 
         self.R0 = self.get_error(x_0)
         self.max_oracle_calls = max_oracle_calls
@@ -61,12 +63,12 @@ class GDOptimizer:
             if self.func_name == "quadratic":
                 error = np.linalg.norm(utils.quadratic_grad(x, self.A, self.b))
             elif self.func_name == "mushrooms":
-                error = np.linalg.norm(utils.logreg_grad(x, self.matrix))
-        else: #f(x_k) - f(x_sol)
+                error = np.linalg.norm(utils.logreg_grad(x, self.matrix, alpha=self.alpha))
+        else: #||x_k - x_sol||
             if self.func_name == "quadratic":
-                error = np.linalg.norm(utils.quadratic_func(x, self.A, self.b, self.c) - self.f_sol)
+                error = np.linalg.norm(x - self.x_sol)
             if self.func_name == "mushrooms":
-                error = np.linalg.norm(utils.logreg_func(x, self.matrix) - self.f_sol)
+                error = np.linalg.norm(x - self.x_sol)
         return error
     
     def optimize(self):
@@ -126,9 +128,7 @@ class AcceleratedGDOptimizer(GDOptimizer):
         x_h_curr = self.theta * self.x_f_curr + (1 - self.theta) * x
         nabla_f, oracle_calls = self.gradient_approximator.approx_gradient(x_h_curr, k)
         x_f_next = x_h_curr - self.p * self.learning_rate_k(k) * nabla_f
-        x_f_next = self.set.projection(x_f_next)
         x_next = self.eta * x_f_next + (self.p - self.eta) * self.x_f_curr + (1 - self.p) * (1 - self.beta) * x + (1 - self.p) * self.beta * x_h_curr
-        x_next = self.set.projection(x_next)
         self.x_f_curr = x_f_next
 
         return x_next, oracle_calls

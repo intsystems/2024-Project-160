@@ -11,7 +11,7 @@ class ZO_oracle:
             raise ValueError(f"Wrong function name {func_name}!")
         self.sigma = sigma
         self.oracle_mode = oracle_mode
-        if oracle_mode not in ["opf", "tpf"]:
+        if oracle_mode not in ["opf", "tpf", "det"]:
             raise ValueError(f"Wrong oracle mode {oracle_mode}!")
         self.args = args
         if self.func_name == "quadratic":
@@ -20,38 +20,53 @@ class ZO_oracle:
             self.c = self.args['c']
         elif self.func_name == "mushrooms":
             self.matrix = self.args['matrix']
+            self.alpha = self.args['alpha']
         self.name = f"{oracle_mode} oracle"
 
     def get_points(self, point_1, point_2):
         if self.func_name == "quadratic":
-            A_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
-            b_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
-            c_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
+            if self.oracle_mode in ["opf", "tpf"]:
+                A_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
+                b_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
+                c_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
 
-            if self.oracle_mode == "opf":
-                A_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
-                b_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
-                c_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
-                
-            if self.oracle_mode == "tpf":
-                A_noise_2 = np.copy(A_noise_1)
-                b_noise_2 = np.copy(b_noise_1)
-                c_noise_2 = np.copy(c_noise_1)
+                if self.oracle_mode == "opf":
+                    A_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
+                    b_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
+                    c_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
+                    
+                if self.oracle_mode == "tpf":
+                    A_noise_2 = np.copy(A_noise_1)
+                    b_noise_2 = np.copy(b_noise_1)
+                    c_noise_2 = np.copy(c_noise_1)
 
-            func_1 = utils.quadratic_func(point_1, A=self.A + A_noise_1, b=self.b + b_noise_1, c=self.c + c_noise_1)
-            func_2 = utils.quadratic_func(point_2, A=self.A + A_noise_2, b=self.b + b_noise_2, c=self.c + c_noise_2)
+                func_1 = utils.quadratic_func(point_1, A=self.A + A_noise_1, b=self.b + b_noise_1, c=self.c + c_noise_1)
+                func_2 = utils.quadratic_func(point_2, A=self.A + A_noise_2, b=self.b + b_noise_2, c=self.c + c_noise_2)
+            if self.oracle_mode == 'det':
+                func_1 = utils.quadratic_func(point_1, A=self.A, b=self.b, c=self.c)
+                func_2 = utils.quadratic_func(point_2, A=self.A, b=self.b, c=self.c)
+                if self.sigma != 0:
+                    func_1 = np.round(func_1, int(-np.log10(self.sigma)))
+                    func_2 = np.round(func_2, int(-np.log10(self.sigma)))
             
         elif self.func_name == "mushrooms":
-            matrix_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
-            
-            if self.oracle_mode == "opf":
-                matrix_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
+            if self.oracle_mode in ["opf", "tpf"]:
+                matrix_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
                 
-            if self.oracle_mode == "tpf":
-                matrix_noise_2 = np.copy(matrix_noise_1)
-                
-            func_1 = utils.logreg_func(point_1, matrix=self.matrix + matrix_noise_1)
-            func_2 = utils.logreg_func(point_2, matrix=self.matrix + matrix_noise_2)
+                if self.oracle_mode == "opf":
+                    matrix_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
+                    
+                if self.oracle_mode == "tpf":
+                    matrix_noise_2 = np.copy(matrix_noise_1)
+                    
+                func_1 = utils.logreg_func(point_1, matrix=self.matrix + matrix_noise_1, alpha=self.alpha)
+                func_2 = utils.logreg_func(point_2, matrix=self.matrix + matrix_noise_2, alpha=self.alpha)
+            if self.oracle_mode == "det":
+                func_1 = utils.logreg_func(point_1, matrix=self.matrix, alpha=self.alpha)
+                func_2 = utils.logreg_func(point_2, matrix=self.matrix, alpha=self.alpha)
+                if self.sigma != 0:
+                    func_1 = np.round(func_1, int(-np.log10(self.sigma)))
+                    func_2 = np.round(func_2, int(-np.log10(self.sigma)))
 
         return func_1, func_2
         
@@ -65,6 +80,7 @@ class TrueGradientApproximator:
             self.c = self.args['c']
         elif self.func_name == "mushrooms":
             self.matrix = self.args['matrix']
+            self.alpha = self.args['alpha']
 
         self.g_curr = None
         self.name = "True grad"
@@ -73,7 +89,7 @@ class TrueGradientApproximator:
         if self.func_name == "quadratic":
             grad = utils.quadratic_grad(x, A=self.A, b=self.b)
         elif self.func_name == "mushrooms":
-            grad = utils.logreg_grad(x, self.matrix)
+            grad = utils.logreg_grad(x, self.matrix, alpha=self.alpha)
             
         self.g_curr = np.copy(grad)
         

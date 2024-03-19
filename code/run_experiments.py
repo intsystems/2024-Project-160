@@ -25,4 +25,5 @@ def init_experiment(func_name, d=112, seed=18, sigma=0, c=False, **init_args):
         y = y * 2 - 3
         matrix = X * np.expand_dims(y, axis=1)
         args['matrix'] = matrix
+        args['alpha'] = init_args['alpha']
     return args
