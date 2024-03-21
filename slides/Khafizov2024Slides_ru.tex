@@ -41,53 +41,28 @@
 \begin{frame}{Доклад с одним слайдом}
 
 \begin{columns}[c]
-\column{0.5\textwidth}
-\begin{figure}
-\includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_GD_AGD_Nesterov_15_1e-07_1e-05.pdf}
-    \caption{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
-\end{figure}
-\column{0.5\textwidth}
-\begin{figure}
-\includegraphics[width=1.0\textwidth]{Deterministic_quadratic_GD_AGD_Nesterov_15.pdf}
-    \caption{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
+    \column{0.5\textwidth}
+    $$\min\limits_{x \in \mathbb{R}^d} f(x)$$
+    \column{0.5\textwidth}
+    $$f_\delta (x) = f(x) + \delta (x).$$
+\end{columns}
+
+$$\widetilde{\nabla}_i f_\delta (x) := \frac{f_\delta (x + \tau e_i) - f_\delta (x - \tau e_i)}{2\tau} e_i$$
+
+\begin{columns}[c]
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_GD_AGD_Nesterov_15.pdf}
+        \caption{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
+    \end{figure}
+
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_GD_AGD_Nesterov_15_1e-07_1e-05.pdf}
+        \caption{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
     \end{figure}
 \end{columns}
 
 \end{frame}
-
-
-%----------------------------------------------------------------------------------------------------------
-% \begin{frame}{Постановка задачи}
-%
-% \end{frame}
-%----------------------------------------------------------------------------------------------------------
-% \begin{frame}{Решение}
-% \begin{columns}[c]
-% \column{0.6\textwidth}
-%     Столбец 1
-% \column{0.4\textwidth}
-%     Столбец 2
-% \end{columns}
-% \end{frame}
-%----------------------------------------------------------------------------------------------------------
-% \begin{frame}{Вычислительный эксперимент}
-%
-%  Что зритель видит на графике.
-%
-% \includegraphics[width=0.8\textwidth]{ErrorFunction}
-%
-% О чем говорит этот график.
-%
-% \end{frame}
-%----------------------------------------------------------------------------------------------------------
-% \begin{frame}{Заключение}
-%     \begin{block}{Перечислите ваши результаты}
-%     \begin{itemize}
-%         \item предложен метод,
-%         \item доказана теорема.
-%     \end{itemize}
-%     \end{block}
-% \end{frame}
-%----------------------------------------------------------------------------------------------------------
 
 \end{document} 
