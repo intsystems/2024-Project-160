@@ -7,12 +7,23 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{nicefrac}
 \usepackage{microtype}
-\usepackage{lipsum}
 \usepackage{graphicx}
 \usepackage{natbib}
 \usepackage{doi}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem-non}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem*{lemma-non}{Lemma}
+\newtheorem{assumption}{A}
+\newtheorem*{assumption-non}{A}
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\bb}{\mathbf{b}}
@@ -32,21 +43,6 @@
 	\And
 	Безносиков Александр \\
 	\texttt{beznosikov.an@phystech.edu}
-	%% \AND
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
-	%% \And
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
-	%% \And
-	%% Coauthor \\
-	%% Affiliation \\
-	%% Address \\
-	%% \texttt{email} \\
 }
 \date{}
 
@@ -92,6 +88,7 @@ State-of-the-art решения в области безградиентной �
 В этом разделе рассматривается детерминированная задача оптимизации:
 \begin{equation}
  \min\limits_{x \in \R^d} f(x).
+ \label{determenistic_problem}
 \end{equation}
 Мы полагаем, что есть доступ только к оракулу нулевого порядка, то есть, мы можем получать только значения $f(x)$, но не градиента $\nabla f(x)$. Следовательно, нужно как-то аппроксимировать градиент $\nabla f(x)$. Также предполагается, что оракул возвращает
 \begin{equation}
@@ -123,6 +120,81 @@ State-of-the-art решения в области безградиентной �
 \end{itemize}
 где $\xi, \xi^+, \xi^- \sim \pi$, $e_i$ --- базисный вектор в $R^d$, $\tau > 0$ --- достаточно мало.\\
 В случае TPF в обоих точках, где мы вызываем оракула, одно и то же значение $\xi$, что может быть тяжело реализуемо. Также TPF является частным случаем OPF ($\xi^+ = \xi^- = \xi$).
+
+\section{Основные результаты}
+Для доказательств сходимости нам требуется сделать несколько предположений о функции $f$ и об оракуле $f_\delta$.
+\subsection{Предположения}
+\begin{assumption}[Гладкость]\label{A1}
+ Функция $f$ является $L$-гладкой на $\R^d$ с константой $L > 0$, т.е.:
+ \begin{equation}
+  \exists L > 0: \forall x, y \in \R^d \hookrightarrow \|\nabla f(x) - \nabla f(y)\| \leqslant L \|x - y\|.
+  \label{l_smoothness}
+ \end{equation}
+\end{assumption}
+
+\begin{assumption}[Сильная выпуклость]\label{A2}
+ Функция $f$ является $ \mu$-сильно выпуклой на $\R^d$, т.е.:
+ \begin{equation}
+  \exists \mu > 0: \forall x, y \in \R^d \hookrightarrow \frac{\mu}{2}\|x - y\|^2 \leqslant f(x) - f(y) - \langle \nabla f(y), x - y \rangle.
+  \label{mu_strongly_convexity}
+ \end{equation}
+\end{assumption}
+
+
+\begin{assumption}[Ограниченность оракульного шума]\label{A3}
+ Оракульный шум ограничен некоторой константой $\Delta > 0$, т.е.:
+ \begin{equation}
+  \exists \Delta > 0: \forall x \in \R^d \hookrightarrow |\delta(x)| \leqslant \Delta.
+  \label{bounded_oracle_noise}
+ \end{equation}
+\end{assumption}
+
+
+\subsection{Алгоритм}
+Предлагается следующая версия ускоренного градиентного метода с аппроксимацией вида (\ref{diff_scheme}), взятой по каждой координате.
+\begin{algorithm}[!ht]
+\caption{ Accelerated Gradient Descent }\label{agd_algorithm}
+\begin{algorithmic}[1]
+   \REQUIRE stepsize $\gamma > 0$, momentums $\theta, \eta, \beta, p$, number of iterations $N$, approximation parameter $\tau > 0$.
+   \textbf{Initialization:} choose $x^0 = x_f^0$
+   \FOR{$k=0, 1,  \ldots, N-1$}
+		\STATE $x_g^k = \theta x_f^k + (1 - \theta)x^k$
+		\STATE $g^k = \sum\limits_{i = 1}^k \frac{f_\delta(x_g^k + \tau e_i) - f_\delta(x_g^k - \tau e_i)}{2\tau}e_i$
+		\STATE $x_f^{k + 1} = x_g^k - p \gamma g^k$
+		\STATE $x^{k + 1} = \eta x_f^{k + 1} + (p - \eta) x_f^k + (1 - p)(1 - \beta) x^k + (1 - p)\beta x_g^k$
+   \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+При доказательстве сходимости понадобится следующая лемма.
+\begin{lemma}
+ Предположим A \ref{A1} - A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
+ \begin{equation}
+  \|\nabla f(x_g^k) - g^k\|^2 \leqslant d (\frac{L\tau}{2} + \frac{\Delta}{\tau}).
+  \label{approximation_estimate}
+ \end{equation}
+
+\end{lemma}
+
+Сформулируем теорему о сходимости метода на описанном классе функций.
+
+\begin{theorem}[Сходимость (\ref{agd_algorithm}) в случае детерминированного шума]
+  Предположим A \ref{A1} - A \ref{A3}. Тогда ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
+  \begin{equation}
+   \begin{aligned}
+   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \\
+   + \frac{6}{\mu} \sqrt{\frac{3}{\mu L}} \left(1 + 2\sqrt{\frac{3}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2,
+   \label{deterministic_convergence}
+   \end{aligned}
+  \end{equation}
+  где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+
+  \begin{equation}
+   p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+  \end{equation}
+
+\end{theorem}
+
 
 \section{Вычислительный эксперимент}
 В эксперименте рассматриваются две задачи: минимизация квадратичной функции и логистическая регрессия на датасете mushrooms. Ускоренный градиентный спуск сравнивается со стандартным градиентным спуском и с методом Нестерова. В качестве аппроксимации градиента используется разностная схема (\ref{diff_scheme}), взятая по каждому базисному вектору $e_i, i = \overline{1, d}$.\\
