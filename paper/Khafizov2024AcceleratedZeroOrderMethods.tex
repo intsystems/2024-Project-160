@@ -24,6 +24,7 @@
 \newtheorem*{lemma-non}{Lemma}
 \newtheorem{assumption}{A}
 \newtheorem*{assumption-non}{A}
+%\newtheorem*{proof}{Proof}
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\bb}{\mathbf{b}}
@@ -167,10 +168,10 @@ State-of-the-art решения в области безградиентной �
 \end{algorithm}
 
 При доказательстве сходимости понадобится следующая лемма.
-\begin{lemma}
- Предположим A \ref{A1} - A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
+\begin{lemma}\label{lemma1}
+ Предположим A \ref{A1}, A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
  \begin{equation}
-  \|\nabla f(x_g^k) - g^k\|^2 \leqslant d (\frac{L\tau}{2} + \frac{\Delta}{\tau}).
+  \|\nabla f(x_g^k) - g^k\|^2 \leqslant d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.
   \label{approximation_estimate}
  \end{equation}
 
@@ -178,7 +179,7 @@ State-of-the-art решения в области безградиентной �
 
 Сформулируем теорему о сходимости метода на описанном классе функций.
 
-\begin{theorem}[Сходимость (\ref{agd_algorithm}) в случае детерминированного шума]
+\begin{theorem}[Сходимость (\ref{agd_algorithm}) в случае детерминированного шума]\label{theorem1}
   Предположим A \ref{A1} - A \ref{A3}. Тогда ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
   \begin{equation}
    \begin{aligned}
@@ -194,7 +195,6 @@ State-of-the-art решения в области безградиентной �
   \end{equation}
 
 \end{theorem}
-
 
 \section{Вычислительный эксперимент}
 В эксперименте рассматриваются две задачи: минимизация квадратичной функции и логистическая регрессия на датасете mushrooms. Ускоренный градиентный спуск сравнивается со стандартным градиентным спуском и с методом Нестерова. В качестве аппроксимации градиента используется разностная схема (\ref{diff_scheme}), взятая по каждому базисному вектору $e_i, i = \overline{1, d}$.\\
@@ -231,5 +231,77 @@ State-of-the-art решения в области безградиентной �
 В проведенных экспериментах ускоренный метод показал себя лучше других, хотя, например, в квадратичной задаче поначалу он ведет себя намного хуже. В задаче логистической регрессии предложенный метод сильно обходит остальные методы.
 \bibliographystyle{plain}
 \bibliography{Khafizov2024AcceleratedZeroOrderMethods}
+
+\newpage
+\appendix
+\begin{lemma}[Lemma \ref{lemma1}]\label{lemma1_appendix}
+ Предположим A \ref{A1}, A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
+ \begin{equation}
+  \|\nabla f(x_g^k) - g^k\|^2 \leqslant d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.
+  \label{approximation_estimate_appendix}
+ \end{equation}
+\end{lemma}
+\begin{proof}
+  $$\|\nabla f(x_g^k) - g^k\|^2 = \sum\limits_{i = 1}^d \left|\nabla_i f(x_g^k) -  \frac{f_\delta (x + \tau e_i) - f_\delta (x - \tau e_i)}{2\tau}\right|^2 = $$
+  $$=\sum\limits_{i = 1}^d \left|\nabla_i f(x_g^k) -  \frac{f(x + \tau e_i) - f(x - \tau e_i)}{2\tau} - \frac{\delta(x + \tau e_i) - \delta(x - \tau e_i)}{2\tau}\right|^2 \leqslant$$
+  $$\leqslant \sum\limits_{i = 1}^d\left( \left|\frac{1}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + \frac{\Delta}{\tau}\right)^2 \leqslant$$
+  $$\leqslant \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau \|f(x_g^k + t e_i) - \nabla f(x_g^k)\|_2 \cdot \|e_i\|_2 dt + \frac{\Delta}{\tau}\right)^2 \leqslant$$
+  $$\leqslant \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau L |t| dt + \frac{\Delta}{\tau}\right)^2 = \sum\limits_{i = 1}^d\left( \frac{L\tau}{2} + \frac{\Delta}{\tau} \right)^2 = d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2$$
+\end{proof}
+
+\begin{lemma}(Неравенство из Theorem 6 в работе \cite{beznosikov2023order})
+Предположим A \ref{A1} - A \ref{A3}. В Algoritm \ref{agd_algorithm} коэффициенты $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ подобраны следующим образом:
+\begin{equation}
+  p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+\end{equation}
+Тогда справедливо неравенство:
+$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant$$
+$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 (1 + 2/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 + $$
+\begin{equation}
++2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] - p \gamma \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2
+\label{theorem_inequality}
+\end{equation}
+\end{lemma}
+
+\begin{theorem}[Theorem \ref{theorem1}]\label{theorem1_appendix}
+   Предположим A \ref{A1} - A \ref{A3}. Тогда ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
+  \begin{equation}
+   \begin{aligned}
+   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \\
+   + \frac{6}{\mu} \sqrt{\frac{3}{\mu L}} \left(1 + 2\sqrt{\frac{3}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2,
+   \label{deterministic_convergence}
+   \end{aligned}
+  \end{equation}
+  где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+
+  \begin{equation}
+   p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+  \end{equation}
+\end{theorem}
+\begin{proof}
+Подставим (\ref{approximation_estimate_appendix}) в (\ref{theorem_inequality}).
+$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +$$
+$$ + p \eta^2 \gamma^2 (1 + 2/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 + 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] - p \gamma \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 \leqslant$$
+$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 ( (1 + 2/\beta) + 2 p(1 + \gamma L)) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 -$$
+$$- p \gamma \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2$$
+Возьмем $p = \frac{1}{2(1 + \gamma L)}$.
+$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))]\leqslant$$
+$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 (1 + 2/\beta + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 $$
+Теперь выберем $\beta/2 = p/\eta$, $p\eta\gamma = 3\beta/2\mu$.
+$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant$$
+$$\leqslant (1 - \beta / 2) \left(\|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) + 9\beta^2/2\mu^2 \cdot (1 + \gamma L) (2 + 2/\beta) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2$$
+Подставляя $\beta = \sqrt{\frac{4p^2\mu\gamma}{3}}$, получим:
+$$\mathbb{E}[\|x^N - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^N) - f(x^*))]\leqslant$$
+$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + 9\beta^2/\mu^2 \cdot (1 + \gamma L) (1 + 1/\beta) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \cdot \frac{2}{\beta}=$$
+$$= \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + \frac{18}{\mu^2} \sqrt{\frac{4p^2\mu\gamma}{3}} \cdot (1 + \gamma L) \left(1 + \sqrt{\frac{3}{4p^2\mu\gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \leqslant$$
+$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + \frac{6 \sqrt{3\gamma}}{\mu^\frac{3}{2}} \left(1 + \sqrt{\frac{3(1 + \gamma L)^2}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.$$
+Наконец, $\eta = \sqrt{\frac{3}{\gamma\mu}}$.
+$$\mathbb{E}[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))]\leqslant$$
+$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{6 \sqrt{3\gamma}}{\mu^\frac{3}{2}} \left(1 + \sqrt{\frac{3(1 + \gamma L)^2}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2$$
+Учитывая $\gamma \leqslant L^{-1}$, оценим:
+$$\mathbb{E}[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))] \leqslant$$
+$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{6}{\mu} \sqrt{\frac{3}{\mu L}} \left(1 + 2\sqrt{\frac{3}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \leqslant$$
+$$\leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{6}{\mu} \sqrt{\frac{3}{\mu L}} \left(1 + 2\sqrt{\frac{3}{\mu \gamma}}\right) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.$$
+\end{proof}
 
 \end{document}
