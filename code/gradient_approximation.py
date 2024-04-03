@@ -86,6 +86,7 @@ class TrueGradientApproximator:
         self.name = "True grad"
     
     def approx_gradient(self, x, k): ### true gradient ###
+        d = len(x)
         if self.func_name == "quadratic":
             grad = utils.quadratic_grad(x, A=self.A, b=self.b)
         elif self.func_name == "mushrooms":
@@ -93,7 +94,7 @@ class TrueGradientApproximator:
             
         self.g_curr = np.copy(grad)
         
-        return self.g_curr, 1
+        return self.g_curr, d
 
 class JaguarApproximator:
     def __init__(self, ZO_oracle, gamma=1e-4, momentum_k=None, batch_size=1):
@@ -162,7 +163,7 @@ class LameApproximator:
         
         self.g_curr = np.copy(approx_grad)
 
-        return self.g_curr, 2
+        return self.g_curr, 1
 
 class TurtleApproximator:
     def __init__(self, ZO_oracle, gamma=1e-5):
@@ -185,4 +186,26 @@ class TurtleApproximator:
         
         self.g_curr = np.copy(approx_grad)
 
-        return self.g_curr, 2 * d
+        return self.g_curr, d
+
+class CoordinateApproximator:
+    def __init__(self, ZO_oracle, gamma=1e-5):
+        self.ZO_oracle = ZO_oracle
+        self.gamma = gamma
+        self.g_curr = None
+        self.name = "coordinate-approximation"
+        
+    def approx_gradient(self, x, k):
+        d = len(x)
+        i = np.random.randint(0, d)
+        e_i = np.zeros(d)
+        e_i[i] = 1
+        point_1 = x + self.gamma * e_i
+        point_2 = x - self.gamma * e_i
+
+        func_1, func_2 = self.ZO_oracle.get_points(point_1, point_2)
+        approx_grad = (func_1 - func_2) / (2 * self.gamma) * e_i
+        
+        self.g_curr = np.copy(approx_grad)
+
+        return self.g_curr, 1

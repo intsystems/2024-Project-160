@@ -37,19 +37,18 @@ def make_err_plot(optimizers_list, labels=None, title=None, markers=None, colors
     if optimizers_list[0].x_sol is not None:
         y_label = r'$\frac{||x^k - x^*||}{||x^0 - x^*||}$'
     else:
-        y_label = r'$||\nabla f(x^k)||$'
+        y_label = r'$\frac{||\nabla f(x^k)||}{||\nabla f(x^0)||}$'
 
     if labels is None:
         if len(set([optimizer.gradient_approximator.name for optimizer in optimizers_list])) > 1:
             labels = [optimizer.gradient_approximator.name for optimizer in optimizers_list]
             if title is None:
-                pass
                 #mode = optimizers_list[0].gradient_approximator.oracle_mode
-                # title = f"Various approximations of the gradient, {optimizers_list[0].name} algorithm"
+                title = f"Various approximations of the gradient, {optimizers_list[0].name} algorithm"
         elif len(set([optimizer.name for optimizer in optimizers_list])) > 1:
             labels = [optimizer.name for optimizer in optimizers_list]
-            # if title is None:
-            #    title = f"Various algorithms, {optimizers_list[0].gradient_approximator.name} approximation"
+            if title is None:
+                title = f"Various algorithms, {optimizers_list[0].gradient_approximator.name} approximation"
         else:
             raise ValueError("Enter labels to the plot!")
 

@@ -74,12 +74,14 @@ class GDOptimizer:
     def optimize(self):
         if self.gradient_approximator.name == "JAGUAR":
             batch_size = self.gradient_approximator.batch_size
-            num_iter = (self.max_oracle_calls - self.d) // (2 * batch_size) + 1
+            num_iter = (self.max_oracle_calls - self.d) // batch_size + 1
         if self.gradient_approximator.name == "$l_2$-smoothing":
-            num_iter = self.max_oracle_calls // 2
+            num_iter = self.max_oracle_calls
         if self.gradient_approximator.name == "full-approximation":
             num_iter = self.max_oracle_calls // self.d
         if self.gradient_approximator.name == "True grad":
+            num_iter = self.max_oracle_calls // self.d
+        if self.gradient_approximator.name == "coordinate-approximation":
             num_iter = self.max_oracle_calls
         
         self.oracle_calls_list = [0]
