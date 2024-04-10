@@ -61,13 +61,13 @@ $$\widetilde{\nabla}_i f_\delta (x) := \frac{f_\delta (x + \tau e_i) - f_\delta 
     \column{0.5\textwidth}
     \begin{figure}
     \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_GD_AGD_Nesterov_15.pdf}
-        \caption{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
+        \caption*{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
     \end{figure}
 
     \column{0.5\textwidth}
     \begin{figure}
     \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_GD_AGD_Nesterov_15_1e-07_1e-05.pdf}
-        \caption{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
+        \caption*{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
     \end{figure}
 \end{columns}
 
@@ -162,17 +162,51 @@ $$\widetilde{\nabla}_i f_\delta (x) := \frac{f_\delta (x + \tau e_i) - f_\delta 
 \end{frame}
 
 \begin{frame}{Вычислительный эксперимент}
-1
+Производится сравнение с методами Нестерова и градиентного спуска. Детерминированный шум реализован округлением до 6 знака после запятой.
+\begin{columns}[c]
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_GD_AGD_Nesterov_15.pdf}
+        \caption*{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
+    \end{figure}
+
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_GD_AGD_Nesterov_15_1e-07_1e-05.pdf}
+        \caption*{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
+    \end{figure}
+\end{columns}
 \end{frame}
 
 
 \begin{frame}{Анализ ошибки}
-2
+\begin{columns}[c]
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Error_analysis_quadratic_sigma=1e-6.pdf}
+        \caption*{Зависимость относительной ошибки $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа оракульных вызовов для Accelerated GD с изменяющимся значением $\tau$, а также Accelerated GD с аналитически вычисленным градиентом, квадратичная задача.}
+    \end{figure}
+
+    \column{0.5\textwidth}
+    \begin{figure}
+    \includegraphics[width=1.0\textwidth]{Error_analysis_logreg_sigma=1e-6.pdf}
+        \caption*{Зависимость относительной ошибки $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа оракульных вызовов для Accelerated GD с изменяющимся значением $\tau$, а также Accelerated GD с аналитически вычисленным градиентом, логистическая регрессия.}
+    \end{figure}
+\end{columns}
 \end{frame}
 
 
 \begin{frame}{Результаты}
-3
+\begin{itemize}
+ \item Предложен метод нулевого порядка, решающий поставленную задачу
+ \item Получена скорость сходимости на описанном классе функций
+ \item Показано превосходство предложенного метода перед методом Нестерова и градиентным спуском
+\end{itemize}
+
+\begin{block}{Будущая работа}
+ Развить теорию на стохастический случай.
+\end{block}
+
 \end{frame}
 
 \end{document}
