@@ -52,7 +52,7 @@ def make_err_plot(optimizers_list, labels=None, title=None, markers=None, colors
         else:
             raise ValueError("Enter labels to the plot!")
 
-    if title is not None:
+    if title is not None and title != '':
         plt.title(title + "\n logarithmic scale on the axis y")
     plt.xlabel(x_label)
     plt.ylabel(y_label)

@@ -26,22 +26,28 @@ class ZO_oracle:
     def get_points(self, point_1, point_2):
         if self.func_name == "quadratic":
             if self.oracle_mode in ["opf", "tpf"]:
-                A_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
-                b_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
-                c_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
+                f_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=1)
+                # A_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
+                # b_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
+                # c_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
 
                 if self.oracle_mode == "opf":
-                    A_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
-                    b_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
-                    c_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
+                    f_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=1)
+                    # A_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.A.shape)
+                    # b_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.b.shape)
+                    # c_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.c.shape)
                     
                 if self.oracle_mode == "tpf":
-                    A_noise_2 = np.copy(A_noise_1)
-                    b_noise_2 = np.copy(b_noise_1)
-                    c_noise_2 = np.copy(c_noise_1)
+                    f_noise_2 = np.copy(f_noise_1)
+                    # A_noise_2 = np.copy(A_noise_1)
+                    # b_noise_2 = np.copy(b_noise_1)
+                    # c_noise_2 = np.copy(c_noise_1)
 
-                func_1 = utils.quadratic_func(point_1, A=self.A + A_noise_1, b=self.b + b_noise_1, c=self.c + c_noise_1)
-                func_2 = utils.quadratic_func(point_2, A=self.A + A_noise_2, b=self.b + b_noise_2, c=self.c + c_noise_2)
+                # func_1 = utils.quadratic_func(point_1, A=self.A + A_noise_1, b=self.b + b_noise_1, c=self.c + c_noise_1)
+                # func_2 = utils.quadratic_func(point_2, A=self.A + A_noise_2, b=self.b + b_noise_2, c=self.c + c_noise_2)
+                func_1 = utils.quadratic_func(point_1, A=self.A, b=self.b, c=self.c) + f_noise_1
+                func_2 = utils.quadratic_func(point_2, A=self.A, b=self.b, c=self.c) + f_noise_2
+
             if self.oracle_mode == 'det':
                 func_1 = utils.quadratic_func(point_1, A=self.A, b=self.b, c=self.c)
                 func_2 = utils.quadratic_func(point_2, A=self.A, b=self.b, c=self.c)
@@ -51,16 +57,19 @@ class ZO_oracle:
             
         elif self.func_name == "mushrooms":
             if self.oracle_mode in ["opf", "tpf"]:
-                matrix_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
+                f_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=1)
+                # matrix_noise_1 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
                 
                 if self.oracle_mode == "opf":
-                    matrix_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
+                    f_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=1)
+                    # matrix_noise_2 = np.random.normal(loc=0, scale=self.sigma, size=self.matrix.shape)
                     
                 if self.oracle_mode == "tpf":
-                    matrix_noise_2 = np.copy(matrix_noise_1)
+                    f_noise_2 = np.copy(f_noise_1)
+                    # matrix_noise_2 = np.copy(matrix_noise_1)
                     
-                func_1 = utils.logreg_func(point_1, matrix=self.matrix + matrix_noise_1, alpha=self.alpha)
-                func_2 = utils.logreg_func(point_2, matrix=self.matrix + matrix_noise_2, alpha=self.alpha)
+                func_1 = utils.logreg_func(point_1, matrix=self.matrix, alpha=self.alpha) + f_noise_1
+                func_2 = utils.logreg_func(point_2, matrix=self.matrix, alpha=self.alpha) + f_noise_2
             if self.oracle_mode == "det":
                 func_1 = utils.logreg_func(point_1, matrix=self.matrix, alpha=self.alpha)
                 func_2 = utils.logreg_func(point_2, matrix=self.matrix, alpha=self.alpha)
@@ -94,7 +103,7 @@ class TrueGradientApproximator:
             
         self.g_curr = np.copy(grad)
         
-        return self.g_curr, d
+        return self.g_curr, 2 * d
 
 class JaguarApproximator:
     def __init__(self, ZO_oracle, gamma=1e-4, momentum_k=None, batch_size=1):
@@ -120,7 +129,7 @@ class JaguarApproximator:
                 self.h_curr += (func_1 - func_2) / (2 * self.gamma) * e_i
             
             self.g_curr = np.copy(self.h_curr) 
-            oracle_calls = d
+            oracle_calls = 2 * d
         else:
             approx_grad = np.zeros_like(x)
             batch_indices = np.random.choice(d, self.batch_size, replace=False)
@@ -163,7 +172,7 @@ class LameApproximator:
         
         self.g_curr = np.copy(approx_grad)
 
-        return self.g_curr, 1
+        return self.g_curr, 2
 
 class TurtleApproximator:
     def __init__(self, ZO_oracle, gamma=1e-5):
@@ -186,7 +195,7 @@ class TurtleApproximator:
         
         self.g_curr = np.copy(approx_grad)
 
-        return self.g_curr, d
+        return self.g_curr, 2 * d
 
 class CoordinateApproximator:
     def __init__(self, ZO_oracle, gamma=1e-5):
@@ -208,4 +217,4 @@ class CoordinateApproximator:
         
         self.g_curr = np.copy(approx_grad)
 
-        return self.g_curr, 1
+        return self.g_curr, 2
