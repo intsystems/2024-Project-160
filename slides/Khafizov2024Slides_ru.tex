@@ -67,7 +67,7 @@ $$\widetilde{\nabla} f_\delta (x) := d\frac{f_\delta (x + \tau e_i) - f_\delta (
     \column{0.5\textwidth}
     \begin{figure}
     \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
-        \caption*{Зависимость $\|\nabla f(x^k)\|$ от числа итераций, задача логистической регрессии}
+        \caption*{Зависимость $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа итераций, задача логистической регрессии}
     \end{figure}
 \end{columns}
 
@@ -186,13 +186,13 @@ $$ \min\limits_{w \in R^d} f(w) = \frac{1}{m}\sum\limits_{k = 1}^m \log(1 + \exp
 \begin{columns}[c]
     \column{0.5\textwidth}
     \begin{figure}
-    \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_AGD_GD_Nesterov_18.pdf}
+    \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
         \caption*{Детерминированный шум, $\Delta = 10^{-6}$, $\tau = 10^{-4}$}
     \end{figure}
 
     \column{0.5\textwidth}
     \begin{figure}
-    \includegraphics[width=1.0\textwidth]{Stochastic_quadratic_AGD_GD_Nesterov_18.pdf}
+    \includegraphics[width=1.0\textwidth]{Stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
         \caption*{Стохастический шум, $\Delta = 10^{-6}$, $\tau = 10^{-4}$}
     \end{figure}
 \end{columns}
