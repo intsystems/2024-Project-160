@@ -18,12 +18,14 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem*{theorem-non}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem*{lemma-non}{Lemma}
+\newtheorem{theorem}{Теорема}
+\newtheorem*{theorem-non}{Теорема}
+\newtheorem{lemma}{Лемма}
+\newtheorem*{lemma-non}{Лемма}
 \newtheorem{assumption}{A}
 \newtheorem*{assumption-non}{A}
+\newtheorem{corollary}{Следствие}
+\newtheorem*{corollary-non}{Следствие}
 
 
 \title{Ускоренные методы нулевого порядка в гладкой выпуклой стохастической оптимизации}
@@ -58,7 +60,6 @@ pdfkeywords={Методы нулевого порядка},
 
 \begin{abstract}
 Данная работа посвящена задаче оптимизации без доступа к градиенту целевой функции. Рассматривается безградиентный метод, требующий $\mathcal{O}(1)$ оракульных вызовов на итерацию. Применяется координатная аппроксимация в ускоренном градиентном методе и доказывается его сходимость для выпуклой задачи оптимизации с доступом к оракулу с детерминированным ограниченным по модулю шумом. В вычислительном эксперименте проводится сравнение предложенного метода с градиентным спуском и методом Нестерова с использованием той же координатной аппроксимации. Наш метод показывает результаты лучше конкурентов в случаях и детерминированного, и стохастического шума.
-
 \end{abstract}
 
 \keywords{методы нулевого порядка, координантная аппроксимация, стохастическая оптимизация}
@@ -188,10 +189,18 @@ State-of-the-art решения в области безградиентной �
   где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
 
   \begin{equation}
-   p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+   p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
   \end{equation}
 
 \end{theorem}
+
+Доказательство приведено в приложении $\ref{theorem1_appendix}$.\\
+Исходя из полученной оценки получим следствие, доказательство которого также описано в $\ref{corollary1_appendix}$.
+
+\begin{corollary}[Оценка на количество оракульных вызовов]\label{corollary1}
+ В предположениях теоремы \ref{theorem1} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) требуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ обращений к оракулу, где $\sigma = \frac{18}{\mu^2} d \left(\frac{L \tau}{2} + \frac{\Delta}{\tau}\right)^2$.
+\end{corollary}
+
 
 \section{Вычислительный эксперимент}
 В эксперименте рассматриваются две задачи: минимизация квадратичной функции и логистическая регрессия на выборке mushrooms. Ускоренный градиентный спуск сравнивается со стандартным градиентным спуском и с методом Нестерова. В качестве аппроксимации градиента используется разностная схема (\ref{diff_scheme}), взятая по случайно выбранному базисному вектору $e_i, i \sim U\{1, d\}$.\\
@@ -264,7 +273,7 @@ State-of-the-art решения в области безградиентной �
 \bibliography{Khafizov2024AcceleratedZeroOrderMethods}
 
 \newpage
-\appendix
+\appendix\label{appendix}
 \begin{lemma}[Lemma \ref{lemma1}]\label{lemma1_appendix}
  Предположим A \ref{A1}, A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
  \begin{equation}
@@ -294,7 +303,7 @@ State-of-the-art решения в области безградиентной �
 \begin{lemma}(Неравенство из доказательства Theorem 6 в работе \cite{beznosikov2023order})
 Предположим A \ref{A1} - A \ref{A3}. В Algoritm \ref{agd_algorithm} коэффициенты $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ подобраны следующим образом:
 \begin{equation}
-  p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+  p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
 \end{equation}
 Тогда справедливо неравенство:
 $$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant$$
@@ -316,7 +325,7 @@ $$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_
   где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
 
   \begin{equation}
-   p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+   p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
   \end{equation}
 \end{theorem}
 \begin{proof}
@@ -349,5 +358,43 @@ $$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|
 $$\mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant$$
 $$\leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).$$
 \end{proof}
+
+\begin{corollary} \label{corollary1_appendix} (Следствие \ref{corollary1})
+ В предположениях теоремы \ref{theorem1} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) требуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ обращений к оракулу, где $\sigma = \frac{18}{\mu^2} d \left(\frac{L \tau}{2} + \frac{\Delta}{\tau}\right)^2$.
+\end{corollary}
+\begin{proof}
+ Выпишем оценку (\ref{deterministic_convergence}):
+   \begin{equation*}
+   \begin{aligned}
+   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\ +\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
+   \end{aligned}
+  \end{equation*}
+  а также, учитывая, что $f(x) \geqslant f(x^*)$ $\forall x \in \mathbb{R}^d$, получим неравенство
+  \begin{equation}
+   \begin{aligned}
+   \mathbb{E}[\|x^N - x^*\|^2] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).
+   \label{corollary1_estimate}
+   \end{aligned}
+  \end{equation}
+  В условиях $\gamma = \frac{3}{4L}$ и $p = \frac{1}{2 (1 + \gamma L) (2d + 1)}$. Отсюда
+  \begin{equation*}
+   \begin{aligned}
+    \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right) = \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\gamma} + \sqrt{\frac{3}{\mu}}\right) = \\ = \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\frac{3}{4L}} + \sqrt{\frac{3}{\mu}}\right) \leqslant \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \cdot 2 \sqrt{\frac{3}{\mu}} = \frac{18}{\mu^2} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 =: \sigma.
+   \end{aligned}
+  \end{equation*}
+  Ограничим правую часть неравенства (\ref{corollary1_estimate}) значением $\varepsilon$:
+  \begin{equation}
+   \begin{aligned}
+   \mathbb{E}[\|x^N - x^*\|^2] \leqslant \exp\left(- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \sigma \leqslant \varepsilon.
+   \end{aligned}
+  \end{equation}
+  Ясно, что если второе неравенство выполнено для некоторого $N$, то алгоритм достиг точности $\varepsilon$ за $N$ шагов. Проведем цепочку преобразований, чтобы получить ограничение на $N$ снизу.
+  $$\exp\left(- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}}\right)  \leqslant \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}$$
+  $$- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}} \leqslant \log \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}$$
+  $$N \geqslant 2 (1 + \gamma L) (2d + 1) \sqrt{\frac{3}{\mu \gamma}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}$$
+  $$N \geqslant 2 \left(1 + \frac{3}{4L} L\right) (2d + 1) \sqrt{\frac{4L}{\mu}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}$$
+  А, учитывая, что за итерацию производится $\mathcal{O}(1)$ обращений к оракулу, следует оценка на количество итераций $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$.
+\end{proof}
+
 
 \end{document}
