@@ -1,9 +1,9 @@
 \documentclass{article}
-\usepackage[utf8]{inputenc} % allow utf-8 input
-\usepackage[russian]{babel}
 \usepackage{arxiv}
 
-\usepackage[T2A]{fontenc}    % use 8-bit T1 fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[english, russian]{babel}   % use 8-bit T1 fonts
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsfonts}
@@ -273,7 +273,11 @@ State-of-the-art решения в области безградиентной �
 \bibliography{Khafizov2024AcceleratedZeroOrderMethods}
 
 \newpage
-\appendix\label{appendix}
+\appendix
+\begin{center}
+    \LARGE \textbf{Appendix}\label{appendix}
+\end{center}
+\normalsize
 \begin{lemma}[Lemma \ref{lemma1}]\label{lemma1_appendix}
  Предположим A \ref{A1}, A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
  \begin{equation}
