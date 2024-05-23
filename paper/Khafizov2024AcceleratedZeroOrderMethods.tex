@@ -2,8 +2,8 @@
 \usepackage{arxiv}
 
 \usepackage[utf8]{inputenc}
-\usepackage[T1,T2A]{fontenc}
-\usepackage[english, russian]{babel}   % use 8-bit T1 fonts
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsfonts}
@@ -100,26 +100,27 @@ State-of-the-art решения в области безградиентной �
 \subsection{Стохастический случай}
 В этом разделе рассматривается более общая стохастическая задача:
 \begin{equation}
- \min\limits_{x \in \mathbb{R}^d} f(x) := \mathsf{E}_{\xi \sim \pi}[f(x, \xi)],
+ \min\limits_{x \in \mathbb{R}^d} f(x) := \mathbb{E}_{\xi \sim \pi}[f(x, \xi)], \label{stochastic_problem}
 \end{equation}
 где $\xi$ --- случайный вектор из неизвестного распределения $\pi$. Здесь мы так же считаем, что у нас нет доступа к градиенту $\nabla f(x, \xi)$, а оракул нулевого порядка возвращает зашумленное значение функции $f_\delta (x, \xi) := f(x, \xi) + \delta (x, \xi)$.\\
 Разделяются два вида аппроксимации градиента в стохастическом случае:
 \begin{itemize}
  \item Two-point feedback (TPF)
  \begin{equation}
-  \widetilde{\nabla} f_\delta (x, \xi) := d\frac{f_\delta (x + \tau e_i, \xi) - f_\delta (x - \tau e_i, \xi)}{2\tau} e_i,
+  \widetilde{\nabla} f_\delta (x, \xi) := d\frac{f_\delta (x + \tau e_i, \xi) - f_\delta (x - \tau e_i, \xi)}{2\tau} e_i,\label{TPF}
  \end{equation}
  \item One-point feedback (OPF)
  \begin{equation}
-  \widetilde{\nabla} f_\delta (x, \xi^+, \xi^-) := d\frac{f_\delta (x + \tau e_i, \xi^+) - f_\delta (x - \tau e_i, \xi^-)}{2\tau} e_i,
+  \widetilde{\nabla} f_\delta (x, \xi^+, \xi^-) := d\frac{f_\delta (x + \tau e_i, \xi^+) - f_\delta (x - \tau e_i, \xi^-)}{2\tau} e_i,\label{OPF}
  \end{equation}
 \end{itemize}
 где $\xi, \xi^+, \xi^- \sim \pi$, $e_i$ --- случайный базисный вектор в $\mathbb{R}^d$, $i \sim U\{1, d\}$, $\tau > 0$ --- достаточно мало.\\
 В случае TPF в обоих точках, где мы вызываем оракула, одно и то же значение $\xi$, что может быть тяжело реализуемо. Также TPF является частным случаем OPF ($\xi^+ = \xi^- = \xi$).
 
 \section{Основные результаты}
+\subsection{Детерминированный случай}
 Для доказательств сходимости нам требуется сделать несколько предположений о функции $f$ и об оракуле $f_\delta$.
-\subsection{Предположения}
+\subsubsection{Предположения}
 \begin{assumption}[Гладкость]\label{A1}
  Функция $f$ является $L$-гладкой на $\mathbb{R}^d$ с константой $L > 0$, т.е.:
  \begin{equation}
@@ -146,7 +147,7 @@ State-of-the-art решения в области безградиентной �
 \end{assumption}
 
 
-\subsection{Алгоритм}
+\subsubsection{Алгоритм}
 Предлагается следующая версия ускоренного градиентного метода с аппроксимацией вида (\ref{diff_scheme}), взятой по случайной координате.
 \begin{algorithm}[!ht]
 \caption{ Accelerated Gradient Descent }\label{agd_algorithm}
@@ -201,6 +202,102 @@ State-of-the-art решения в области безградиентной �
  В предположениях теоремы \ref{theorem1} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) требуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ обращений к оракулу, где $\sigma = \frac{18}{\mu^2} d \left(\frac{L \tau}{2} + \frac{\Delta}{\tau}\right)^2$.
 \end{corollary}
 
+\subsection{Стохастический случай}
+Сделаем предположения о функции $f(x, \xi)$ и об оракуле $f_\delta(x, \xi) = f(x, \xi) + \delta(x, \xi)$.
+
+\begin{assumption} [Гладкость]\label{A4}
+Функция $f(x, \xi)$ является $L(\xi)$-гладкой на $\mathbb{R}^d$, т.е.:
+\begin{equation}
+    \exists L(\xi) > 0: \forall x, y \in \mathbb{R}^d \hookrightarrow \|\nabla f(x, \xi) - \nabla f(y,\xi)\| \leqslant L(\xi) \|x - y\|.
+  \label{l_smoothness_stochastic}
+\end{equation}
+Также предполагается, что существует константа $L$ такая, что:
+\begin{equation}
+    L^2 := \mathbb{E}\left[L(\xi)^2\right].
+\end{equation}
+\end{assumption}
+Если предположение \ref{A4} выполняется, то функция $f(x)$ является $L$-гладкой на $\mathbb{R}^d$, поскольку $\forall x, y \in \mathbb{R}^d$ выполняется:
+\begin{equation}
+    \left\|\nabla f(x) - \nabla f(y)\right\|^2 = \left\|\mathbb{E}\left[\nabla f(x, \xi) - \nabla f(x,\xi)\right]\right\|^2 \leqslant \mathbb{E}\left[\left\|\nabla f(x, \xi) - \nabla f(x, \xi)\right\|^2\right] \leqslant L^2 \|x - y\|^2.
+\end{equation}
+
+\begin{assumption}[Ограниченность оракульного шума]\label{A5}
+Второй момент оракульного шума ограничен некоторой константой $\Delta^2 > 0$, т.е.:
+\begin{equation}
+    \exists \Delta > 0: \forall x \in \mathbb{R}^d \hookrightarrow \mathbb{E}\left[|\delta(x, \xi)|^2\right] \leqslant \Delta^2.
+  \label{bounded_oracle_noise_stochastic}
+\end{equation}
+\end{assumption}
+
+Если предположение \ref{A5} выполняется, то определив $\delta(x) := \mathbb{E}\left[\delta(x, \xi)\right]$, верно $|\delta(x)|^2 \leqslant \Delta^2$, поскольку
+
+\begin{equation}
+    |\delta(x)|^2 = \left|\mathbb{E}\left[\delta(x,\xi)\right]\right|^2 \leqslant \mathbb{E}\left[|\delta(x, \xi)|^2\right] \leqslant \Delta^2.
+\end{equation}
+
+\begin{assumption} [Ограниченность второго момента градиента]\label{A6}
+Второй момент $\nabla f(x, \xi)$ ограничен, т.е.:
+\begin{equation}
+    \exists \sigma_\nabla^2: \mathbb{E}\left[\left\|\nabla f(x, \xi) - \nabla f(x)\right\|^2\right] \leqslant \sigma_\nabla^2.
+    \label{bounded_second_moment_nabla}
+\end{equation}
+
+\end{assumption}
+
+\begin{assumption}[Ограниченность второго момента функции]\label{A7}
+Второй момент $f(x, \xi)$ ограничен, т.е.:
+\begin{equation}
+    \exists \sigma_f^2: \mathbb{E}\left[\left\|f(x, \xi) - f(x)\right\|^2\right] \leqslant \sigma_f^2.
+    \label{bounded_second_moment_f}
+\end{equation}
+\end{assumption}
+
+\subsubsection{Алгоритм}
+Предлагается следующая версия ускоренного стохастического градиентного спуска с OPF (\ref{OPF}) аппроксимацией градиента.
+\begin{algorithm}[!ht]
+\caption{ Accelerated Stochastic Gradient Descent (OPF) }\label{asgd_opf_algorithm}
+\begin{algorithmic}[1]
+   \REQUIRE stepsize $\gamma > 0$, momentums $\theta, \eta, \beta, p$, number of iterations $N$, approximation parameter $\tau > 0$.
+   \textbf{Initialization:} choose $x^0 = x_f^0$
+   \FOR{$k=0, 1,  \ldots, N-1$}
+		\STATE $x_g^k = \theta x_f^k + (1 - \theta)x^k$
+		\STATE Sample $i \sim U\{1, \dots, d\}$
+        \STATE Sample 2 realizations of $\xi$: $\xi^-_k$ and $\xi^+_k$ independently
+		\STATE $g^k = d\frac{f_\delta(x_g^k + \tau e_i, \xi^+_k) - f_\delta(x_g^k - \tau e_i, \xi^-_k)}{2\tau}e_i$
+		\STATE $x_f^{k + 1} = x_g^k - p \gamma g^k$
+		\STATE $x^{k + 1} = \eta x_f^{k + 1} + (p - \eta) x_f^k + (1 - p)(1 - \beta) x^k + (1 - p)\beta x_g^k$
+   \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+Для доказательства сходимости потребуется следующая лемма.
+\begin{lemma}\label{lemma2}
+Предположим A \ref{A4}, A \ref{A5}, A \ref{A6}, A \ref{A7}. Тогда для оценки градиента $g^k$ в методе \ref{asgd_opf_algorithm} выполняется:
+ \begin{equation}
+  \|\nabla f(x_g^k) - \mathbb{E}g^k\|^2 \leqslant \frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}
+  \label{norm_of_expectation_stochastic_opf}
+ \end{equation}
+ \begin{equation}
+  \mathbb{E}[\|\nabla f(x_g^k) - g^k\|^2] \leqslant 4d \|\nabla f(x_g^k)\|^2 + 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}.
+  \label{expectation_of_norm_stochastic_opf}
+ \end{equation}
+\end{lemma}
+
+\begin{theorem}[Сходимость (\ref{asgd_opf_algorithm})]\label{theorem2}
+   Предположим A \ref{A4}, A \ref{A5}, A \ref{A6}, A \ref{A7}. Тогда ускоренный стохастический градиентный спуск (Algorithm \ref{asgd_opf_algorithm}), использующий OPF (\ref{OPF}) аппроксимацию градиента, имеет скорость сходимости на задаче (\ref{stochastic_problem}):
+  \begin{equation}
+   \begin{aligned}
+   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) + \frac{d L^2 \tau^2}{2} + \frac{4 d \sigma_f^2}{\tau^2} + 4 \sigma_\nabla^2 d + \frac{\Delta^2}{2\tau^2}\right),
+   \label{stochastic_opf_convergence}
+   \end{aligned}
+  \end{equation}
+  где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+
+  \begin{equation}
+   p \simeq (2(1 + \gamma L)(4d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+  \end{equation}
+\end{theorem}
+
 
 \section{Вычислительный эксперимент}
 В эксперименте рассматриваются две задачи: минимизация квадратичной функции и логистическая регрессия на выборке mushrooms. Ускоренный градиентный спуск сравнивается со стандартным градиентным спуском и с методом Нестерова. В качестве аппроксимации градиента используется разностная схема (\ref{diff_scheme}), взятая по случайно выбранному базисному вектору $e_i, i \sim U\{1, d\}$.\\
@@ -217,14 +314,14 @@ State-of-the-art решения в области безградиентной �
 \centering
   \includegraphics[width=0.7\textwidth]{../figures/Deterministic_quadratic_AGD_GD_Nesterov_18.pdf}
  \caption{Зависимость относительной ошибки $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа оракульных вызовов для методов ускоренного градиентного спуска, градиентного спуска и Нестерова на квадратичной задаче минимизации. Детерминированный шум.}
-  \label{fig:non-stochastic_logreg}
+  \label{fig:non-stochastic_quadratic}
 \end{figure}
 
 \begin{figure}[!htbp]
 \centering
   \includegraphics[width=0.7\textwidth]{../figures/Stochastic_quadratic_AGD_GD_Nesterov_18.pdf}
  \caption{Зависимость относительной ошибки $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа оракульных вызовов для методов ускоренного градиентного спуска, градиентного спуска и Нестерова на квадратичной задаче минимизации. Стохастический шум (OPF).}
-  \label{fig:non-stochastic_logreg}
+  \label{fig:stochastic_quadratic}
 \end{figure}
 
 
@@ -245,7 +342,7 @@ State-of-the-art решения в области безградиентной �
 \centering
   \includegraphics[width=0.7\textwidth]{../figures/Stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
  \caption{Зависимость относительной ошибки $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа оракульных вызовов для методов ускоренного градиентного спуска, градиентного спуска и Нестерова на задаче логистической регрессии. Стохастический шум (OPF).}
-  \label{fig:non-stochastic_logreg}
+  \label{fig:stochastic_logreg}
 \end{figure}
 \subsection{Отчет по эксперименту}
 В проведенных экспериментах ускоренный метод показал себя лучше других, хотя, например, в квадратичной задаче поначалу он ведет себя намного хуже. В задаче логистической регрессии предложенный метод сильно обходит остальные методы. Также в задаче логистической регрессии в случае детерминированного шума ускоренный метод достиг предельной точности для аппроксимации (\ref{diff_scheme}) и вышел на плато. То есть значения в $\tau$-окрестности этой точки отличаются меньше, чем на величину округления. В эксперименте со стохастичнеским шумом на тех же итерациях видны скачки, что тоже свидетельствует о приближении к предельной точности решения.
@@ -257,7 +354,7 @@ State-of-the-art решения в области безградиентной �
 \centering
   \includegraphics[width=0.7\textwidth]{../figures/Error_analysis_quadratic_sigma=1e-6.pdf}
  \caption{Зависимость относительной ошибки $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа оракульных вызовов для Accelerated GD с изменяющимся значением $\tau$, а также Accelerated GD с аналитически вычисленным градиентом, квадратичная задача.}
-  \label{fig:non-stochastic_quadratic}
+  \label{fig:error_quadratic}
 \end{figure}
 В построенном графике наблюдается, что параметр $\tau=10^{-3}$ является оптимальным из рассмотренных. Также видно, что методы, использующие аппроксимацию градиента на небольшом количестве итераций опережают версию с честным градиентом. Обясняется это тем, что последний делает много оракульных вызовов, как следствие мало шагов, и не успевает накопить моменты.
 \subsection{Логистическая регрессия}
@@ -266,7 +363,7 @@ State-of-the-art решения в области безградиентной �
 \centering
   \includegraphics[width=0.7\textwidth]{../figures/Error_analysis_logreg_sigma=1e-6.pdf}
  \caption{Зависимость относительной ошибки $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа оракульных вызовов для Accelerated GD с изменяющимся значением $\tau$, а также Accelerated GD с аналитически вычисленным градиентом, логистическая регрессия.}
-  \label{fig:non-stochastic_logreg}
+  \label{fig:error_logreg}
 \end{figure}
 Здесь хорошо сходятся методы со значениями $\tau \in [10^{-4}, 10^{-1}]$. Также по сравнению с истинным градиентом, сходимость выглядит более стабильно.
 \bibliographystyle{plain}
@@ -279,9 +376,9 @@ State-of-the-art решения в области безградиентной �
 \end{center}
 \normalsize
 \begin{lemma}[Lemma \ref{lemma1}]\label{lemma1_appendix}
- Предположим A \ref{A1}, A \ref{A3}. Тогда для аппроксимации градиента $g^k$ в алгоритме \ref{agd_algorithm} выполняется
+ Предположим A \ref{A1}, A \ref{A3}. Тогда для оценки градиента $g^k$ в методе \ref{agd_algorithm} выполнено:
  \begin{equation}
-  \|\nabla f(x_g^k) - \mathbb{E}g^k\|^2 \leqslant d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.
+  \|\nabla f(x_g^k) - \mathbb{E}g^k\|^2 \leqslant d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2,
   \label{norm_of_expectation_appendix}
  \end{equation}
  \begin{equation}
@@ -290,115 +387,289 @@ State-of-the-art решения в области безградиентной �
  \end{equation}
 \end{lemma}
 \begin{proof}
-  $$\|\nabla f(x_g^k) - \mathbb{E} g^k\|^2 = \left\lVert \nabla f(x_g^k) - \mathbb{E}\left[d\frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} e_i + d\frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2\tau} e_i\right]\right\rVert^2 = $$
-  $$=\sum\limits_{i = 1}^d \left|\frac{f(x + \tau e_i) - f(x - \tau e_i)}{2\tau} - \nabla_i f(x_g^k) - \frac{\delta(x + \tau e_i) - \delta(x - \tau e_i)}{2\tau}\right|^2 \leqslant$$
-  $$\leqslant \sum\limits_{i = 1}^d\left( \left|\frac{1}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + \frac{\Delta}{\tau}\right)^2 \leqslant$$
-  $$\leqslant \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau \|f(x_g^k + t e_i) - \nabla f(x_g^k)\|_2 \cdot \|e_i\|_2 dt + \frac{\Delta}{\tau}\right)^2 \leqslant$$
-  $$\leqslant \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau L |t| dt + \frac{\Delta}{\tau}\right)^2 = \sum\limits_{i = 1}^d\left( \frac{L\tau}{2} + \frac{\Delta}{\tau} \right)^2 = d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.$$
-
-  $$\mathbb{E}[\|\nabla f(x_g^k) - g^k\|^2] = \frac{1}{d} \sum\limits_{i = 1}^d \left\lVert\nabla f(x_g^k) - d \frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} e_i - d\frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2 \tau} e_i\right\rVert^2=$$
-  $$=\frac{1}{d} \sum\limits_{i = 1}^d \left(\sum\limits_{j \neq i} |\nabla_j f(x_g^k)|^2 + \left|d\left(\frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} - \nabla_i f(x_g^k)\right) + (d - 1) \nabla_i f(x_g^k) + d \frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2 \tau}\right|^2\right) \leqslant$$
-  $$\leqslant \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + \left(\left|\frac{d}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + (d - 1)|\nabla_i f(x_g^k)| + d \frac{\Delta}{\tau}\right)^2\right)\leqslant$$
-  $$\leqslant \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + \left(d\frac{L\tau}{2} + (d - 1)|\nabla_i f(x_g^k)| + d \frac{\Delta}{\tau}\right)^2\right)\leqslant$$
-  $$\leqslant \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + 2\left(d\frac{L\tau}{2} + d \frac{\Delta}{\tau}\right)^2 + 2(d - 1)^2|\nabla_i f(x_g^k)|^2\right)=$$
-  $$=\|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 + 2 \frac{(d - 1)^2}{d} \|\nabla f(x_g^k)\|^2 \leqslant 2d \|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.$$
+\begin{align*}
+    \|\nabla f(x_g^k) - \mathbb{E} g^k\|^2 =& \left\lVert \nabla f(x_g^k) - \mathbb{E}\left[d\frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} e_i + d\frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2\tau} e_i\right]\right\rVert^2 = \\
+    =&\sum\limits_{i = 1}^d \left|\frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} - \nabla_i f(x_g^k) - \frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2\tau}\right|^2 \leqslant\\
+    \leqslant& \sum\limits_{i = 1}^d\left( \left|\frac{1}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + \frac{\Delta}{\tau}\right)^2 \leqslant\\
+    \leqslant& \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau \|f(x_g^k + t e_i) - \nabla f(x_g^k)\|_2 \cdot \|e_i\|_2 dt + \frac{\Delta}{\tau}\right)^2 \leqslant\\
+    \leqslant& \sum\limits_{i = 1}^d\left( \frac{1}{2\tau} \int\limits_{-\tau}^\tau L |t| dt + \frac{\Delta}{\tau}\right)^2 = \sum\limits_{i = 1}^d\left( \frac{L\tau}{2} + \frac{\Delta}{\tau} \right)^2 = d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2
+\end{align*}
+\begin{align*}
+    \mathbb{E}[\|\nabla f(x_g^k) - g^k\|^2] =& \frac{1}{d} \sum\limits_{i = 1}^d \left\lVert\nabla f(x_g^k) - d \frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} e_i - d\frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2 \tau} e_i\right\rVert^2=\\
+    =&\frac{1}{d} \sum\limits_{i = 1}^d \left(\sum\limits_{j \neq i} |\nabla_j f(x_g^k)|^2 + \left|d\left(\frac{f(x_g^k + \tau e_i) - f(x_g^k - \tau e_i)}{2\tau} - \nabla_i f(x_g^k)\right) \right.\right.+\\&+\left.\left.(d - 1) \nabla_i f(x_g^k) + d \frac{\delta(x_g^k + \tau e_i) - \delta(x_g^k - \tau e_i)}{2 \tau}\right|^2\right)\leqslant\\
+    \leqslant& \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + \left(\left|\frac{d}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + (d - 1)|\nabla_i f(x_g^k)| + d \frac{\Delta}{\tau}\right)^2\right)\leqslant\\
+    \leqslant& \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + \left(\left|\frac{d}{2\tau} \int\limits_{-\tau}^\tau \langle f(x_g^k + t e_i) - \nabla f(x_g^k), e_i \rangle dt\right| + (d - 1)|\nabla_i f(x_g^k)| + d \frac{\Delta}{\tau}\right)^2\right)\leqslant\\
+    \leqslant& \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + \left(d\frac{L\tau}{2} + (d - 1)|\nabla_i f(x_g^k)| + d \frac{\Delta}{\tau}\right)^2\right)\leqslant\\
+    \leqslant& \frac{1}{d} \sum\limits_{i = 1}^d \left(\|\nabla f(x_g^k)\|^2 + 2\left(d\frac{L\tau}{2} + d \frac{\Delta}{\tau}\right)^2 + 2(d - 1)^2|\nabla_i f(x_g^k)|^2\right)=\\
+    =&\|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 + 2 \frac{(d - 1)^2}{d} \|\nabla f(x_g^k)\|^2 \leqslant\\
+    \leqslant& 2d \|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2.
+\end{align*}
 \end{proof}
 
-\begin{lemma}(Неравенство из доказательства Theorem 6 в работе \cite{beznosikov2023order})
-Предположим A \ref{A1} - A \ref{A3}. В Algoritm \ref{agd_algorithm} коэффициенты $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ подобраны следующим образом:
+\begin{lemma}(Неравенство из доказательства
+Theorem 6 в работе \cite{beznosikov2023order})
+Предположим A \ref{A1} - A \ref{A3}. В Algorithm \ref{agd_algorithm} коэффициенты $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ подобраны следующим образом:
 \begin{equation}
-  p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+    p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
 \end{equation}
 Тогда справедливо неравенство:
-$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant$$
-$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 (1 + 2p/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 + $$
-\begin{equation}
-+2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] - p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2
-\label{theorem_inequality}
-\end{equation}
+\begin{align}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 +\\
+    &+2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] -\\
+    &-p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|.\label{theorem_inequality}
+\end{align}
 \end{lemma}
 
-\begin{theorem}[Theorem \ref{theorem1}]\label{theorem1_appendix}
-   Предположим A \ref{A1} - A \ref{A3}. Тогда ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
-  \begin{equation}
-   \begin{aligned}
-   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\ +\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
-   \label{deterministic_convergence}
-   \end{aligned}
-  \end{equation}
-  где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
-
-  \begin{equation}
+\begin{theorem}[Теорема \ref{theorem1}]\label{theorem1_appendix}
+Предположим A \ref{A1} - A \ref{A3}. Тогда ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
+\begin{align}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+    &+\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
+   \label{deterministic_convergence_appendix}
+\end{align}
+где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+\begin{equation}
    p \simeq (2(1 + \gamma L)(2d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
-  \end{equation}
+\end{equation}
 \end{theorem}
 \begin{proof}
-Подставим (\ref{norm_of_expectation_appendix}) и (\ref{expectation_of_norm_appendix}) в (\ref{theorem_inequality}).
-$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +$$
-$$ + p \eta^2 \gamma^2 (1 + 2p/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 + 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] - p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 \leqslant$$
+Используя (\ref{norm_of_expectation_appendix}) и (\ref{expectation_of_norm_appendix}) в (\ref{theorem_inequality}).
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 +\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] -\\
+    &- p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 \leqslant\\
+    \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2+\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \left(2d \|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\right) -\\
+    &- p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 =\\
+    =&(1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 d\left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \left(1 + 2p/\beta + 4pd(1 + \gamma L)\right)+\\
+    &+p \gamma \eta^2 \|\nabla f(x_g^k)\|^2 (2p(1 + \gamma L) \cdot 2d + 2p(1 + \gamma L) - 1)
+\end{align*}
 
-$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 (1 + 2p/\beta) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2+$$
-$$+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \left(2d \|\nabla f(x_g^k)\|^2 + 2 d^2 \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\right) - p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 =$$
-$$=(1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + $$
-$$+ p \eta^2 \gamma^2 d\left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \left(1 + 2p/\beta + 4pd(1 + \gamma L)\right)+$$
-$$+p \gamma \eta^2 \|\nabla f(x_g^k)\|^2 (2p(1 + \gamma L) \cdot 2d + 2p(1 + \gamma L) - 1)$$
-
-Возьмем $p = \frac{1}{2(1 + \gamma L)(2d + 1)}$.
-$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))]\leqslant$$
-$$\leqslant (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + p \eta^2 \gamma^2 d\left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \left(1 + 2p/\beta + 4pd(1 + \gamma L)\right)$$
-Теперь выберем $\beta/2 = p/\eta$, $p\eta\gamma = 3\beta/2\mu$.
-$$\mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant$$
-$$\leqslant (1 - \beta / 2) \left(\|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) + \frac{9\beta^2}{4\mu^2} \cdot 2(1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + 2p/\beta + 4pd(1 + \gamma L)\right) = $$
-$$=(1 - \beta / 2) \left(\|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) + \frac{9\beta^2}{2\mu^2} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + \eta + \frac{2d}{2d + 1}\right)$$
-Подставляя $\beta = \sqrt{\frac{4p^2\mu\gamma}{3}}$, получим:
-$$\mathbb{E}[\|x^N - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^N) - f(x^*))]\leqslant$$
-$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + \frac{9\beta^2}{2\mu^2} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + \eta + 1\right) \cdot \frac{2}{\beta}=$$
-$$= \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + \frac{9}{\mu^2} \sqrt{\frac{4p^2\mu\gamma}{3}} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \eta\right) \leqslant$$
-$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \eta\right).$$
-Наконец, $\eta = \sqrt{\frac{3}{\gamma\mu}}$.
-$$\mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right]\leqslant$$
-$$\leqslant \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).$$
-Воспользуемся соотношением $(1 - x)^N \leqslant \exp(-Nx)$:
-$$\mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant$$
-$$\leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).$$
+Взяв $p = \frac{1}{2(1 + \gamma L)(2d + 1)}$, получим:
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))]\leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*))+\\
+    &+ p \eta^2 \gamma^2 d\left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \left(1 + 2p/\beta + 4pd(1 + \gamma L)\right).
+\end{align*}
+Теперь подберем $\beta/2 = p/\eta$, $p\eta\gamma = 3\beta/2\mu$.
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2) \left(\|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) +\\
+    &+ \frac{9\beta^2}{4\mu^2} \cdot 2(1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + 2p/\beta + 4pd(1 + \gamma L)\right)=\\
+    =&(1 - \beta / 2) \left(\|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right)+\\
+    &+ \frac{9\beta^2}{2\mu^2} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + \eta + \frac{2d}{2d + 1}\right)
+\end{align*}
+Выбрав $\beta = \sqrt{\frac{4p^2\mu\gamma}{3}}$, получим:
+\begin{align*}
+    \mathbb{E}[\|x^N - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^N) - f(x^*))] \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right)+\\
+    &+ \frac{9\beta^2}{2\mu^2} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(1 + \eta + 1\right) \cdot \frac{2}{\beta}=\\
+    =& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{9}{\mu^2} \sqrt{\frac{4p^2\mu\gamma}{3}} \cdot (1 + \gamma L) (2d + 1) d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \eta\right) \leqslant\\
+    \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right)+\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \eta\right).
+\end{align*}
+Наконец подставим $\eta = \sqrt{\frac{3}{\gamma\mu}}$.
+\begin{align*}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right)
+\end{align*}
+Учитывая, что $(1 - x)^N \leqslant \exp(-Nx)$:
+\begin{align*}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right)+\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).
+\end{align*}
 \end{proof}
 
 \begin{corollary} \label{corollary1_appendix} (Следствие \ref{corollary1})
- В предположениях теоремы \ref{theorem1} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) требуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ обращений к оракулу, где $\sigma = \frac{18}{\mu^2} d \left(\frac{L \tau}{2} + \frac{\Delta}{\tau}\right)^2$.
+ При выполнении условий \ref{theorem1} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) потребуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ оракульных вызовов, где $\sigma = \frac{18}{\mu^2} d \left(\frac{L \tau}{2} + \frac{\Delta}{\tau}\right)^2$.
 \end{corollary}
 \begin{proof}
- Выпишем оценку (\ref{deterministic_convergence}):
-   \begin{equation*}
-   \begin{aligned}
-   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\ +\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
-   \end{aligned}
-  \end{equation*}
-  а также, учитывая, что $f(x) \geqslant f(x^*)$ $\forall x \in \mathbb{R}^d$, получим неравенство
-  \begin{equation}
-   \begin{aligned}
+Используя неравенство (\ref{deterministic_convergence}):
+\begin{align*}
+   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+   &+\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
+\end{align*}
+и учитывая, что $f(x) \geqslant f(x^*)$ $\forall x \in \mathbb{R}^d$, получаем
+\begin{equation}
    \mathbb{E}[\|x^N - x^*\|^2] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right).
    \label{corollary1_estimate}
-   \end{aligned}
-  \end{equation}
-  В условиях $\gamma = \frac{3}{4L}$ и $p = \frac{1}{2 (1 + \gamma L) (2d + 1)}$. Отсюда
-  \begin{equation*}
-   \begin{aligned}
-    \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right) = \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\gamma} + \sqrt{\frac{3}{\mu}}\right) = \\ = \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\frac{3}{4L}} + \sqrt{\frac{3}{\mu}}\right) \leqslant \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \cdot 2 \sqrt{\frac{3}{\mu}} = \frac{18}{\mu^2} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 =: \sigma.
-   \end{aligned}
-  \end{equation*}
-  Ограничим правую часть неравенства (\ref{corollary1_estimate}) значением $\varepsilon$:
-  \begin{equation}
-   \begin{aligned}
+\end{equation}
+Подставляя $\gamma = \frac{3}{4L}$ и $p = \frac{1}{2 (1 + \gamma L) (2d + 1)}$:
+\begin{align*}
+    \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right) =& \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\gamma} + \sqrt{\frac{3}{\mu}}\right) = \\
+    =& \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2\sqrt{\frac{3}{4L}} + \sqrt{\frac{3}{\mu}}\right) \\
+    \leqslant& \frac{3 \sqrt{3}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 \cdot 2 \sqrt{\frac{3}{\mu}} =\\
+    =&\frac{18}{\mu^2} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2 =: \sigma.
+\end{align*}
+Ограничивая правую часть неравенства (\ref{corollary1_estimate}) $\varepsilon$:
+\begin{equation}
    \mathbb{E}[\|x^N - x^*\|^2] \leqslant \exp\left(- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) + \sigma \leqslant \varepsilon.
-   \end{aligned}
-  \end{equation}
-  Ясно, что если второе неравенство выполнено для некоторого $N$, то алгоритм достиг точности $\varepsilon$ за $N$ шагов. Проведем цепочку преобразований, чтобы получить ограничение на $N$ снизу.
-  $$\exp\left(- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}}\right)  \leqslant \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}$$
-  $$- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}} \leqslant \log \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}$$
-  $$N \geqslant 2 (1 + \gamma L) (2d + 1) \sqrt{\frac{3}{\mu \gamma}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}$$
-  $$N \geqslant 2 \left(1 + \frac{3}{4L} L\right) (2d + 1) \sqrt{\frac{4L}{\mu}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}$$
-  А, учитывая, что за итерацию производится $\mathcal{O}(1)$ обращений к оракулу, следует оценка на количество итераций $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$.
+\end{equation}
+Ясно, что если второе неравенство выполнено для некоторого $N$, то алгоритм достиг $\varepsilon$-точного решения за $N$ шагов. Теперь проведем цепочку неравенств для получения оценки на $N$.
+\begin{align*}
+    \exp\left(- \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}}\right) \leqslant& \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}\\
+    - \frac{N}{2 (1 + \gamma L) (2d + 1)}\sqrt{\frac{\mu\gamma}{3}} \leqslant& \log \frac{\varepsilon - \sigma}{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}\\
+    N \geqslant& 2 (1 + \gamma L) (2d + 1) \sqrt{\frac{3}{\mu \gamma}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}\\
+    N \geqslant& 2 \left(1 + \frac{3}{4L} L\right) (2d + 1) \sqrt{\frac{4L}{\mu}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}\\
+    N \geqslant& 7(2d + 1) \sqrt{\frac{L}{\mu}} \log \frac{\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))}{\varepsilon - \sigma}
+\end{align*}
+Наконец, учитывая, что каждая итерация требует $\mathcal{O}(1)$ оракульных вызовов, получается оценка на оракульную сложность $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$.
 \end{proof}
 
+\begin{lemma}[Lemma \ref{lemma2}]\label{lemma2_appendix}
+Предположим A \ref{A4}, A \ref{A5}, A \ref{A6}, A \ref{A7}. Тогда для оценки градиента $g^k$ в методе \ref{asgd_opf_algorithm} выполняется:
+\begin{equation}
+    \|\nabla f(x_g^k) - \mathbb{E}g^k\|^2 \leqslant \frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}
+    \label{norm_of_expectation_stochastic_opf_appendix}
+\end{equation}
+\begin{equation}
+    \mathbb{E}[\|\nabla f(x_g^k) - g^k\|^2] \leqslant 4d \|\nabla f(x_g^k)\|^2 + 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}.
+    \label{expectation_of_norm_stochastic_opf_appendix}
+\end{equation}
+\end{lemma}
+\begin{proof}
+\begin{align*}
+    \|\nabla f(x_g^k) - \mathbb{E} g^k\|^2 =& \left\lVert\nabla f(x_g^k) - \mathbb{E}\left[d\frac{f_\delta(x_g^k + \tau e_i, \xi^+) - f_\delta(x_g^k - \tau e_i, \xi^-)}{2\tau} e_i\right]\right\rVert^2 = \\
+    =& \left\lVert\nabla f(x_g^k) - \mathbb{E}\left[\frac{1}{d} \sum\limits_{i = 1}^d d\frac{f_\delta(x_g^k + \tau e_i, \xi_i^+) - f_\delta(x_g^k - \tau e_i, \xi_i^-)}{2\tau} e_i\right]\right\rVert^2 = \\
+    =& \left\lVert\nabla f(x_g^k) - \mathbb{E}\left[\sum\limits_{i = 1}^d \frac{f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)}{2\tau} e_i\right] \right.-\\
+    &-\left.\mathbb{E}\left[\sum\limits_{i = 1}^d \frac{\delta_(x_g^k + \tau e_i, \xi_i^+) - \delta_(x_g^k - \tau e_i, \xi_i^-)}{2\tau} e_i\right]\right\rVert^2 \leqslant \\
+    \leqslant& \frac{1}{2\tau^2} \left\lVert 2\tau \nabla f(x_g^k) - \mathbb{E}\left[\sum\limits_{i = 1}^d (f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)) e_i\right]\right\rVert^2 + \frac{2d \Delta^2}{\tau^2} = \\
+    =& \frac{1}{2\tau^2} \sum\limits_{i = 1}^d \left| 2\tau \nabla_i f(x_g^k) - \mathbb{E}f(x_g^k + \tau e_i, \xi_i^+) + \mathbb{E} f(x_g^k - \tau e_i, \xi_i^-)\right|^2 + \frac{2d \Delta^2}{\tau^2}
+\end{align*}
+
+\begin{align*}
+    \left| 2\tau \nabla_i f(x_g^k) - \mathbb{E} f(x_g^k + \tau e_i, \xi_i^+) + \mathbb{E} f(x_g^k - \tau e_i, \xi_i^-)\right|^2 =& \left| \tau \mathbb{E} \nabla_i f(x_g^k, \xi_i^+) + \tau \mathbb{E} \nabla_i f(x_g^k, \xi_i^-) - \mathbb{E} f(x_g^k + \tau e_i, \xi_i^+) \right.+\\
+    &+\left.\mathbb{E} f(x_g^k, \xi_i^+) - \mathbb{E} f(x_g^k, \xi_i^-) + \mathbb{E} f(x_g^k - \tau e_i, \xi_i^-)\right|^2 \leqslant \\
+    \leqslant& 2 \left| \mathbb{E} \left[\tau  \nabla_i f(x_g^k, \xi_i^+) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k, \xi_i^+)\right]\right|^2 +\\
+    &+2 \left| \mathbb{E} \left[ \tau \nabla_i f(x_g^k, \xi_i^-) - f(x_g^k, \xi_i^-) + f(x_g^k - \tau e_i, \xi_i^-)\right]\right|^2 \leqslant \\
+    \leqslant& 2 \mathbb{E} \left[\left|\tau  \nabla_i f(x_g^k, \xi_i^+) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k, \xi_i^+)\right|^2\right] +\\
+    &+2 \mathbb{E}\left[\left| \tau \nabla_i f(x_g^k, \xi_i^-) - f(x_g^k, \xi_i^-) + f(x_g^k - \tau e_i, \xi_i^-)\right|^2\right] \leqslant \\
+    \leqslant& 4 \frac{L^2\tau^4}{4} = L^2\tau^4
+\end{align*}
+\begin{align*}
+    \mathbb{E} \left[\left|\tau  \nabla_i f(x_g^k, \xi_i^+) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k, \xi_i^+)\right|^2\right] =&
+    \mathbb{E} \left[\left|\int\limits_0^\tau (\nabla_i f(x_g^k + t e_i, \xi_i^+) - \nabla_i f(x_g^k, \xi_i^+)) dt \right|^2\right] \leqslant \\
+    \leqslant& \mathbb{E} \left[\left(\int\limits_0^\tau \left|\nabla_i f(x_g^k + t e_i, \xi_i^+) - \nabla_i f(x_g^k, \xi_i^+)\right| dt \right)^2\right] \leqslant\\
+    \leqslant&\mathbb{E} \left[\left(\int\limits_0^\tau \left\lVert\nabla f(x_g^k + t e_i, \xi_i^+) - \nabla f(x_g^k, \xi_i^+)\right\rVert dt \right)^2\right] \leqslant \\
+    \leqslant& \mathbb{E} \left[\left(\int\limits_0^\tau L(\xi_i^+) |t| dt \right)^2\right] = \mathbb{E} \left[L^2(\xi_i^+) \frac{\tau^4}{4}\right] = \frac{L^2 \tau^4}{4}
+\end{align*}
+
+\begin{equation*}
+    \|\nabla f(x_g^k) - \mathbb{E} g^k\|^2 \leqslant \frac{1}{2\tau^2}\sum\limits_{i = 1}^d L^2\tau^4 + \frac{2d \Delta^2}{\tau^2} = \frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}
+\end{equation*}
+
+\begin{align*}
+    \mathbb{E} \left[\|\nabla f(x_g^k) - g^k\|^2\right] =& \mathbb{E} \left[\left\lVert\nabla f(x_g^k) - d \frac{f_\delta(x_g^k + \tau e_i, \xi_i^+) - f_\delta(x_g^k - \tau e_i, \xi_i^-)}{2 \tau} e_i \right\rVert^2\right] = \\
+    =& \mathbb{E} \left[\left\lVert\nabla f(x_g^k) - d \frac{f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)}{2 \tau} e_i \right.\right.-\\
+    &-\left.\left. d \frac{\delta(x_g^k + \tau e_i, \xi_i^+) - \delta(x_g^k - \tau e_i, \xi_i^-)}{2 \tau} e_i \right\rVert^2\right] \leqslant \\
+    \leqslant& \frac{1}{2\tau^2} \mathbb{E} \left[\|2\tau \nabla f(x_g^k) - d \left(f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)\right) e_i \|^2 \right] + 2d^2 \frac{\Delta^2}{\tau^2}
+\end{align*}
+\begin{align*}
+    &\mathbb{E} \left[\|2\tau \nabla f(x_g^k) - d \left(f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)\right) e_i \|^2 \right] = \\
+    =& \frac{1}{d} \sum\limits_{i = 1}^d \mathbb{E} \left[\|2\tau \nabla f(x_g^k) - d \left(f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)\right) e_i \|^2 \right] = \\
+    =& \frac{1}{d} \sum\limits_{i = 1}^d \mathbb{E} \left[ \sum\limits_{j \neq i} |2 \tau \nabla_j f(x_g^k)|^2 + \left|2\tau \nabla_i f(x_g^k) - d \left(f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k - \tau e_i, \xi_i^-)\right)\right|^2 \right] \leqslant \\
+    \leqslant& 4\tau^2 \|\nabla f(x_g^k)\|^2 + \frac{1}{d} \sum\limits_{i = 1}^d \mathbb{E} \left[\left|d\left(2\tau \nabla_i f(x_g^k) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k - \tau e_i, \xi_i^-)\right) - 2\tau(d - 1) \nabla_i f(x_g^k)\right|^2 \right] \leqslant \\
+    \leqslant& 4\tau^2 \|\nabla f(x_g^k)\|^2 + \frac{2}{d} \sum\limits_{i = 1}^d \mathbb{E} \left[\left|d\left(2\tau \nabla_i f(x_g^k) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k - \tau e_i, \xi_i^-)\right)\right|^2\right] + \frac{2}{d} \sum\limits_{i = 1}^d 4 \tau^2 (d - 1)^2 \mathbb{E} [|\nabla_i f(x_g^k)|^2] \leqslant \\
+    \leqslant& 4 \tau^2 \cdot 2d \|\nabla f(x_g^k)\|^2 + 2d \sum\limits_{i = 1}^d \mathbb{E} \left[\left|2\tau \nabla_i f(x_g^k) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k - \tau e_i, \xi_i^-)\right|^2\right]
+\end{align*}
+\begin{align*}
+    \mathbb{E} \left[\left|2\tau \nabla_i f(x_g^k) - f(x_g^k + \tau e_i, \xi_i^+) + f(x_g^k - \tau e_i, \xi_i^-)\right|^2\right] \leqslant& 4 \mathbb{E} \left[\left|f(x_g^k + \tau e_i, \xi_i^+) - f(x_g^k, \xi_i^+) - \tau \nabla_i f(x_g^k, \xi_i^+)\right|^2\right] + \\
+    &+ 4 \mathbb{E} \left[\left|f(x_g^k - \tau e_i, \xi_i^-) + f(x_g^k, \xi_i^-) + \tau \nabla_i f(x_g^k, \xi_i^-)|\right|^2\right] + \\
+    &+ 4 \mathbb{E} \left[\left|f(x_g^k, \xi_i^+) - f(x_g^k, \xi_i^-)\right|^2\right] + \\
+    &+ 4 \mathbb{E} \left[\left| \tau \left(\nabla_i f(x_g^k, \xi_i^+) + \nabla_i f(x_g^k, \xi_i^-) - 2 \nabla_i f(x_g^k)\right)\right|^2\right] \leqslant \\
+    \leqslant& 4 \frac{L^2 \tau^4}{4} + 4 \frac{L^2 \tau^4}{4} +\\
+    &+ 4 \mathbb{E}\left[|f(x_g^k, \xi_i^+) - f(x_g^k) + f(x_g^k) - f(x_g^k, \xi_i^-)|^2\right] + \\
+    &+ 4\tau^2 \mathbb{E}\left[|\nabla_i f(x_g^k, \xi_i^+) - \nabla_i f(x_g^k) + \nabla_i f(x_g^k, \xi_i^-) - \nabla f(x_g^k)|^2\right] \leqslant \\
+    \leqslant& 2 L^2 \tau^2 + 8 \mathbb{E}\left[|f(x_g^k, \xi_i^+) - f(x_g^k)|^2\right] + 8 \mathbb{E} \left[\left|f(x_g^k) - f(x_g^k, \xi_i^-)\right|^2\right] + \\
+    &+ 8\tau^2 \mathbb{E}\left[|\nabla_i f(x_g^k, \xi_i^+) - \nabla_i f(x_g^k)|^2\right] +\\
+    &+8\tau^2 \mathbb{E}\left[|\nabla_i f(x_g^k, \xi_i^-) - \nabla f(x_g^k)|^2\right] \leqslant \\
+    \leqslant& 2 L^2 \tau^2 + 16\sigma_f^2 + 16\tau^2 \sigma_\nabla^2
+\end{align*}
+\begin{align*}
+    \mathbb{E} \left[\|\nabla f(x_g^k) - g^k\|^2\right] \leqslant& \frac{1}{2\tau^2} \left(4 \tau^2 \cdot 2d \|\nabla f(x_g^k)\|^2 + 2d \sum\limits_{i = 1}^d (2 L^2 \tau^2 + 16\sigma_f^2 + 16\tau^2 \sigma_\nabla^2)\right) +  2d^2 \frac{\Delta^2}{\tau^2} = \\
+    =& 4d \|\nabla f(x_g^k)\|^2 + 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16\tau^2 d^2 \sigma_\nabla^2 + \frac{2 d^2 \Delta^2}{\tau^2}
+\end{align*}
+
+\end{proof}
+
+\begin{theorem}[Theorem \ref{theorem2}]\label{theorem2_appendix}
+   Предположим A \ref{A4}, A \ref{A5}, A \ref{A6}, A \ref{A7}. Тогда ускоренный стохастический градиентный спуск (Algorithm \ref{asgd_opf_algorithm}), использующий OPF (\ref{OPF}) аппроксимацию градиента, имеет скорость сходимости на задаче (\ref{stochastic_problem}):
+\begin{equation}
+    \begin{aligned}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) + \frac{d L^2 \tau^2}{2} + \frac{4 d \sigma_f^2}{\tau^2} + 4 \sigma_\nabla^2 d + \frac{\Delta^2}{2\tau^2}\right),
+    \label{stochastic_convergence_opf_appendix}
+    \end{aligned}
+\end{equation}
+где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+\begin{equation}
+    p \simeq (2(1 + \gamma L)(4d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+\end{equation}
+\end{theorem}
+\begin{proof}
+Используя (\ref{norm_of_expectation_stochastic_opf_appendix}) и (\ref{expectation_of_norm_stochastic_opf_appendix}) в (\ref{theorem_inequality}).
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \|\mathbb{E}[g^k] - \nabla f(x_g^k)\|^2 +\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \mathbb{E}[\|g^k - \nabla f(x_g^k)\|^2] -\\
+    &- p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 \leqslant\\
+    \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \left(4d \|\nabla f(x_g^k)\|^2 + 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) -\\
+    &- p \gamma^2 \eta^2 (1 - 2p(1 + \gamma L))\|\nabla f(x_g^k)\|^2 = \\
+    =& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) +\\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) -\\
+    &- p \gamma^2 \eta^2 \left(1 - 2p(1 + \gamma L)(1 + 4d))\right)\|\nabla f(x_g^k)\|^2
+\end{align*}
+Взяв $p = \frac{1}{2(1 + \gamma L)(4d + 1)}$, получим:
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2) \|x^k - x^*\|^2 + (1 - p/\eta) 2 \gamma \eta^2 (f(x_f^k) - f(x^*)) + \\
+    &+ p \eta^2 \gamma^2 (1 + 2p/\beta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\\
+    &+ 2 p^2 \eta^2 \gamma^2 (1 + \gamma L) \left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right).
+\end{align*}
+
+Теперь подберем $\beta/2 = p/\eta$, $p\eta\gamma = 3\beta/2\mu$.
+\begin{align*}
+    \mathbb{E}[\|x^{k + 1} - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^{k + 1}) - f(x^*))] \leqslant& (1 - \beta / 2)\left( \|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) + \\
+    &+ \frac{9\beta^2}{4\mu^2} \frac{1}{p}(1 + 2p/\beta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\\
+    &+ 2\frac{9\beta^2}{4\mu^2} (1 + \gamma L) \left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) \leqslant \\
+    \leqslant& (1 - \beta / 2)\left( \|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) +\\
+    &+\frac{9\beta^2}{4\mu^2} 2(1 + \gamma L)(4d + 1) (1 + \eta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\\
+    &+\frac{9\beta^2}{2\mu^2} (1 + \gamma L) \left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) = \\
+    =& (1 - \beta / 2)\left( \|x^k - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^k) - f(x^*))\right) +\\
+    &+ \frac{9\beta^2}{2\mu^2} (1 + \gamma L)\left((4d + 1) (1 + \eta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) + 2 d^2 L^2 \tau^2 + \right.\\
+    &+\left.\frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right)
+\end{align*}
+
+Выбрав $\beta = \sqrt{\frac{4p^2\mu\gamma}{3}}$, получим:
+\begin{align*}
+    \mathbb{E}[\|x^N - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^N) - f(x^*))] \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{9\beta^2}{2\mu^2} (1 + \gamma L)\left((4d + 1) (1 + \eta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left. 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) \cdot \frac{2}{\beta}=\\
+    =& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{9}{\mu^2} \sqrt{\frac{4p^2\mu\gamma}{3}} \cdot (1 + \gamma L)\left((4d + 1) (1 + \eta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left. 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right) \leqslant\\
+    \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + 2 \gamma \eta^2 (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}(4d + 1)} \left((4d + 1) (1 + \eta) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left. 2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right).
+\end{align*}
+Теперь подставим $\eta = \sqrt{\frac{3}{\gamma\mu}}$.
+\begin{align*}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \left(1 - \sqrt{\frac{p^2\mu\gamma}{3}}\right)^N \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left.\frac{1}{4d + 1}\left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right)\right)
+\end{align*}
+Наконец, используя $(1 - x)^N \leqslant \exp(-Nx)$:
+\begin{align*}
+    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left. \frac{1}{4d + 1}\left(2 d^2 L^2 \tau^2 + \frac{16 d^2 \sigma_f^2}{\tau^2} + 16 \sigma_\nabla^2 d^2 + \frac{2d \Delta^2}{\tau^2}\right)\right)\leqslant\\
+    \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+    &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) \right.+\\
+    &+\left. \frac{d L^2 \tau^2}{2} + \frac{4 d \sigma_f^2}{\tau^2} + 4 \sigma_\nabla^2 d + \frac{\Delta^2}{2\tau^2}\right).
+\end{align*}
+\end{proof}
 
 \end{document}
