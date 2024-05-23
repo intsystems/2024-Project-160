@@ -5,7 +5,8 @@
 \setbeamertemplate{footline}[page number]
 %
 \usepackage[utf8]{inputenc}
-\usepackage[english,russian]{babel}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
 \usepackage{amssymb,amsfonts,amsmath,mathtext}
 \usepackage{subfig}
 \usepackage[all]{xy} % xy package for diagrams
@@ -17,6 +18,12 @@
 \usepackage{algpseudocode}
 % Your figures are here:
 \graphicspath{ {fig/} {../figures/} }
+
+
+\newtheorem{theorem-ru}{Теорема}
+\newtheorem{assumption}{A}
+\newtheorem{corollary-ru}{Следствие}
+% \newtheorem*{corollary-non}{Следствие}
 
 %----------------------------------------------------------------------------------------------------------
 \title[\hbox to 56mm{Ускоренные безградиентные методы}]{Ускоренные методы нулевого порядка в гладкой выпуклой стохастической оптимизации}
@@ -39,39 +46,39 @@
 \begin{block}{Цель:}
 \begin{itemize}
  \item Создать ускоренный безградиентный метод решения задачи безусловной гладкой стохастической оптимизации
- \item Доказать сходимость в случае детерминированного шума
+ \item Доказать сходимость в случае стохастического шума
  \item Поставить численный эксперимент и сравнить с методом Нестерова и градиентным спуском в случаях детерминированного и стохастического шума
 \end{itemize}
 
 \end{block}
 \end{frame}
 %-----------------------------------------------------------------------------------------------------
-\begin{frame}{Доклад с одним слайдом}
-
-\begin{columns}[c]
-    \column{0.5\textwidth}
-    $$\min\limits_{x \in \mathbb{R}^d} f(x)$$
-    \column{0.5\textwidth}
-    $$f_\delta (x) = f(x) + \delta (x)$$
-\end{columns}
-
-$$\widetilde{\nabla} f_\delta (x) := d\frac{f_\delta (x + \tau e_i) - f_\delta (x - \tau e_i)}{2\tau} e_i, i \sim U\{1, d\}$$
-
-\begin{columns}[c]
-    \column{0.5\textwidth}
-    \begin{figure}
-    \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_AGD_GD_Nesterov_18.pdf}
-        \caption*{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
-    \end{figure}
-
-    \column{0.5\textwidth}
-    \begin{figure}
-    \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
-        \caption*{Зависимость $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа итераций, задача логистической регрессии}
-    \end{figure}
-\end{columns}
-
-\end{frame}
+% \begin{frame}{Доклад с одним слайдом}
+%
+% \begin{columns}[c]
+%     \column{0.5\textwidth}
+%     $$\min\limits_{x \in \mathbb{R}^d} f(x)$$
+%     \column{0.5\textwidth}
+%     $$f_\delta (x) = f(x) + \delta (x)$$
+% \end{columns}
+%
+% $$\widetilde{\nabla} f_\delta (x) := d\frac{f_\delta (x + \tau e_i) - f_\delta (x - \tau e_i)}{2\tau} e_i, i \sim U\{1, d\}$$
+%
+% \begin{columns}[c]
+%     \column{0.5\textwidth}
+%     \begin{figure}
+%     \includegraphics[width=1.0\textwidth]{Deterministic_quadratic_AGD_GD_Nesterov_18.pdf}
+%         \caption*{Зависимость $\frac{\|x^k - x^*\|}{\|x^0 - x^*\|}$ от числа итераций, квадратичная задача минимизации}
+%     \end{figure}
+%
+%     \column{0.5\textwidth}
+%     \begin{figure}
+%     \includegraphics[width=1.0\textwidth]{Non_stochastic_Logreg_AGD_GD_Nesterov_18_1e-06_0.0001.pdf}
+%         \caption*{Зависимость $\frac{\|\nabla f(x^k)\|}{\|\nabla f(x^0)\|}$ от числа итераций, задача логистической регрессии}
+%     \end{figure}
+% \end{columns}
+%
+% \end{frame}
 
 %-----------------------------------
 
@@ -87,79 +94,178 @@ $$\widetilde{\nabla} f_\delta (x) := d\frac{f_\delta (x + \tau e_i) - f_\delta (
 
 %-----------------------------------
 
-\begin{frame}{Постановка задачи. Детерминированный случай}
-\begin{block}{Дано}
- $f: \mathbb{R}^d \to \mathbb{R}$ --- $\mu$-сильно выпуклая, $L$-гладкая функция. Доступ к оракулу нулевого порядка $f_\delta(x) = f(x) + \delta(x)$: $|\delta(x)| \leqslant \Delta$.
-\end{block}
-\begin{block}{Требуется}
- Построить алгоритм, решающий задачу
- \begin{equation}
-  \min\limits_{x \in \mathbb{R}^d} f(x),
-  \label{determenistic_problem}
- \end{equation}
-
- обращаясь к оракулу $f_\delta$.
-\end{block}
-
-\end{frame}
+% \begin{frame}{Постановка задачи. Детерминированный случай}
+% \begin{block}{Дано}
+%  $f: \mathbb{R}^d \to \mathbb{R}$ --- $\mu$-сильно выпуклая, $L$-гладкая функция. Доступ к оракулу нулевого порядка $f_\delta(x) = f(x) + \delta(x)$: $|\delta(x)| \leqslant \Delta$.
+% \end{block}
+% \begin{block}{Требуется}
+%  Построить алгоритм, решающий задачу
+%  \begin{equation}
+%   \min\limits_{x \in \mathbb{R}^d} f(x),
+%   \label{determenistic_problem}
+%  \end{equation}
+%
+%  обращаясь к оракулу $f_\delta$.
+% \end{block}
+%
+% \end{frame}
 
 %----------------------------------------
 
-\begin{frame}{Постановка задачи. Стохастический случай}
+% \begin{frame}{Предложенный метод}
+%
+% \begin{algorithm}[H]
+% \caption{ Accelerated Gradient Descent }
+% \label{agd_algorithm}
+% \begin{algorithmic}
+% \Require{stepsize $\gamma > 0$, momentums $\theta, \eta, \beta, p$, number of iterations $N$, approximation parameter $\tau > 0$.}
+% \State\textbf{Initialization:} choose $x^0 = x_f^0$
+%    \For{$k=0, 1,  \ldots, N-1$}
+% 		\State $x_g^k = \theta x_f^k + (1 - \theta)x^k$
+%         \State Sample $i \sim U\{1, d\}$
+% 		\State $g^k = d \frac{f_\delta(x_g^k + \tau e_i) - f_\delta(x_g^k - \tau e_i)}{2\tau}e_i$
+% 		\State $x_f^{k + 1} = x_g^k - p \gamma g^k$
+% 		\State $x^{k + 1} = \eta x_f^{k + 1} + (p - \eta) x_f^k + (1 - p)(1 - \beta) x^k + (1 - p)\beta x_g^k$
+%    \EndFor
+% \end{algorithmic}
+% \end{algorithm}
+
+% \end{frame}
+
+%-----------------------------------
+
+% \begin{frame}{Скорость сходимости}
+% \begin{theorem}\label{theorem1}
+%   Ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
+%   \begin{equation}
+%    \begin{aligned}
+%    \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \qquad \qquad \\
+%    \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\ +\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
+%    \label{deterministic_convergence}
+%    \end{aligned}
+%   \end{equation}
+%   где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
+%
+%   \begin{equation}
+%    p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
+%   \end{equation}
+%
+% \end{theorem}
+% \end{frame}
+
+
+
+%-----------------------
+
+\begin{frame}{Постановка задачи}
 \begin{block}{Дано}
- $f: \mathbb{R}^d \to \mathbb{R}$ --- $\mu$-сильно выпуклая, $L$-гладкая функция. Доступ к оракулу нулевого порядка $f_\delta(x) = f(x) + \delta(x, \xi)$: $\mathbb{E}[|\delta(x, \xi)|^2] \leqslant \Delta^2$.
+    Доступ к оракулу нулевого порядка $f_\delta(x) = f(x, \xi) + \delta(x, \xi)$.
 \end{block}
 \begin{block}{Требуется}
  Построить алгоритм, решающий задачу
- $$\min\limits_{x \in \mathbb{R}^d} f(x) := \mathbb{E}_{\xi \sim \pi}[f(x, \xi)],$$
+ $$\min\limits_{x \in \mathbb{R}^d} f(x) := \mathbb{E}_{\xi \sim \pi}[f(x, \xi)], \label{stochactic_proble`m}$$
  обращаясь к оракулу $f_\delta$.
 \end{block}
 
 \end{frame}
-
 %--------------------------------------
+
+\begin{frame}{Предположения}
+
+\begin{assumption}[1. Сильная выпуклость] \label{A1}
+ \begin{equation}
+  \exists \mu > 0: \forall x, y \in \mathbb{R}^d \hookrightarrow \frac{\mu}{2}\|x - y\|^2 \leqslant f(x) - f(y) - \langle \nabla f(y), x - y \rangle.
+  \label{mu_strongly_convexity}
+ \end{equation}
+\end{assumption}
+
+\begin{assumption}[2. Гладкость]\label{A2}
+\begin{equation}
+    \exists L(\xi) > 0: \forall x, y \in \mathbb{R}^d \hookrightarrow \|\nabla f(x, \xi) - \nabla f(y,\xi)\| \leqslant L(\xi) \|x - y\|.
+  \label{l_smoothness_stochastic}
+\end{equation}
+\begin{equation}
+    L^2 := \mathbb{E}\left[L(\xi)^2\right].
+\end{equation}
+\end{assumption}
+
+\end{frame}
+
+% --------------------------------
+
+\begin{frame}{Предположения}
+
+\begin{assumption}[3. Ограниченность оракульного шума]\label{A3}
+\begin{equation}
+    \exists \Delta > 0: \forall x \in \mathbb{R}^d \hookrightarrow \mathbb{E}\left[|\delta(x, \xi)|^2\right] \leqslant \Delta^2.
+  \label{bounded_oracle_noise_stochastic}
+\end{equation}
+\end{assumption}
+
+
+
+\begin{assumption}[4. Ограниченность второго момента градиента]\label{A4}
+\begin{equation}
+    \exists \sigma_\nabla^2: \mathbb{E}\left[\left\|\nabla f(x, \xi) - \nabla f(x)\right\|^2\right] \leqslant \sigma_\nabla^2.
+    \label{bounded_second_moment_nabla}
+\end{equation}
+\end{assumption}
+
+\begin{assumption}[5. Ограниченность второго момента функции]\label{A5}
+\begin{equation}
+    \exists \sigma_f^2: \mathbb{E}\left[\left\|f(x, \xi) - f(x)\right\|^2\right] \leqslant \sigma_f^2.
+    \label{bounded_second_moment_f}
+\end{equation}
+\end{assumption}
+\end{frame}
+% ----------------------------
+
 
 
 \begin{frame}{Предложенный метод}
-
+\subsubsection{Алгоритм}
 \begin{algorithm}[H]
-\caption{ Accelerated Gradient Descent }
-\label{agd_algorithm}
-\begin{algorithmic}
-\Require{stepsize $\gamma > 0$, momentums $\theta, \eta, \beta, p$, number of iterations $N$, approximation parameter $\tau > 0$.}
-\State\textbf{Initialization:} choose $x^0 = x_f^0$
+\caption{ Accelerated Stochastic Gradient Descent (OPF) \label{asgd_opf_algorithm} }
+\begin{algorithmic}[1]
+   \Require stepsize $\gamma > 0$, momentums $\theta, \eta, \beta, p$, number of iterations $N$, approximation parameter $\tau > 0$.
+   \State\textbf{Initialization:} choose $x^0 = x_f^0$
    \For{$k=0, 1,  \ldots, N-1$}
 		\State $x_g^k = \theta x_f^k + (1 - \theta)x^k$
-        \State Sample $i \sim U\{1, d\}$
-		\State $g^k = d \frac{f_\delta(x_g^k + \tau e_i) - f_\delta(x_g^k - \tau e_i)}{2\tau}e_i$
+		\State Sample $i \sim U\{1, \dots, d\}$
+        \State Sample 2 realizations of $\xi$: $\xi^-_k$ and $\xi^+_k$ independently
+		\State $g^k = d\frac{f_\delta(x_g^k + \tau e_i, \xi^+_k) - f_\delta(x_g^k - \tau e_i, \xi^-_k)}{2\tau}e_i$
 		\State $x_f^{k + 1} = x_g^k - p \gamma g^k$
 		\State $x^{k + 1} = \eta x_f^{k + 1} + (p - \eta) x_f^k + (1 - p)(1 - \beta) x^k + (1 - p)\beta x_g^k$
    \EndFor
 \end{algorithmic}
 \end{algorithm}
-
 \end{frame}
 
-%-----------------------------------
+% -------------------------------------
 
-\begin{frame}{Скорость сходимости}
-\begin{theorem}\label{theorem1}
-  Ускоренный градиентный спуск (Algorithm \ref{agd_algorithm}) имеет скорость сходимости на задаче (\ref{determenistic_problem}):
-  \begin{equation}
-   \begin{aligned}
-   \mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \qquad \qquad \\
-   \leqslant \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\ +\frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \cdot d \left(\frac{L\tau}{2} + \frac{\Delta}{\tau}\right)^2\left(2 + \sqrt{\frac{3}{\gamma\mu}}\right),
-   \label{deterministic_convergence}
-   \end{aligned}
-  \end{equation}
-  где $\gamma \in (0, \frac{3}{4L}], \beta, \theta, \eta, p$ такие, что:
-
-  \begin{equation}
-   p \simeq (2(1 + \gamma L))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}, \theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1.}
-  \end{equation}
-
-\end{theorem}
+\begin{frame}{Теорема о сходимости}
+ \begin{theorem-ru}\label{theorem2}
+   Предположим A \ref{A1}-\ref{A5}. Тогда ускоренный стохастический градиентный спуск (Algorithm \ref{asgd_opf_algorithm}) имеет скорость сходимости:
+   \begin{align*}
+   &\mathbb{E}\left[\|x^N - x^*\|^2 + \frac{6}{\mu} (f(x_f^N) - f(x^*))\right] \leqslant \\
+   \leqslant& \exp\left(- N\sqrt{\frac{p^2\mu\gamma}{3}}\right) \left(\|x^0 - x^*\|^2 + \frac{6}{\mu} (f(x_f^0) - f(x^*))\right) +\\
+   &+ \frac{3 \sqrt{3\gamma}}{\mu^{3/2}} \left(\left(1 + \sqrt{\frac{3}{\gamma\mu}}\right) \left(\frac{d L^2 \tau^2}{2} + \frac{2d\Delta^2}{\tau^2}\right) +\right.\\
+   &+\left.\frac{d L^2 \tau^2}{2} + \frac{4 d \sigma_f^2}{\tau^2} + 4 \sigma_\nabla^2 d + \frac{\Delta^2}{2\tau^2}\right),
+   \label{stochastic_opf_convergence}
+   \end{align*}
+   где $\gamma \in (0, \frac{3}{4L}], p \simeq (2(1 + \gamma L)(4d + 1))^{-1}, \beta \simeq \sqrt{p^2 \mu \gamma}, \eta \simeq \sqrt{\frac{1}{\mu\gamma}}$, $\theta \simeq \frac{p \eta^{-1} - 1}{\beta p \eta^{-1} - 1}.$
+\end{theorem-ru}
 \end{frame}
+
+\begin{frame}{Оценка на количество оракульных вызовов}
+ \begin{corollary-ru}
+ В предположениях теоремы \ref{theorem2} и выборе $\gamma = \frac{3}{4L}$ для достижения $\varepsilon$-точности решения ($\mathbb{E} \|x^N - x^*\|^2 \leqslant \varepsilon$) требуется $\mathcal{O}\left(d \sqrt{\frac{L}{\mu}} \log \frac{1}{\varepsilon - \sigma}\right)$ обращений к оракулу, где $\sigma = \frac{9}{2\mu^2}\left(2dL^2\tau^2 + \frac{\Delta^2}{2\tau^2}(12d + 1) + \frac{4d\sigma_f^2}{\tau^2} + 4d \sigma_\nabla^2\right)$.
+\end{corollary-ru}
+\end{frame}
+
+
+%--------------------------------------
+
 
 \begin{frame}{Вычислительный эксперимент. Квадратичная задача}
 $$\min\limits_{x \in \mathbb{R}^d} f(x) = x^T A x + b^T x + c$$
@@ -218,12 +324,12 @@ $$ \min\limits_{w \in R^d} f(w) = \frac{1}{m}\sum\limits_{k = 1}^m \log(1 + \exp
 \begin{frame}{Результаты}
 \begin{itemize}
  \item Предложен метод нулевого порядка, решающий поставленную задачу
- \item Получена скорость сходимости на описанном классе функций в случае детерминированного шума
+ \item Получена скорость сходимости на описанном классе функций в случае стохастического шума
  \item Показано превосходство предложенного метода над методом Нестерова и градиентным спуском
 \end{itemize}
 
 \begin{block}{Будущая работа}
- Развить теорию на стохастический случай.
+Поставить эксперимент на более сложной задаче.
 \end{block}
 
 \end{frame}
